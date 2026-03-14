@@ -100,8 +100,9 @@
     <!-- ==================== MODAL AREA ==================== -->
 
     <!-- Modal 1: List Reservasi Harian -->
-    <div x-show="modals.list" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
-        <div @click.away="modals.list = false" class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
+    <div x-show="modals.list" class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
+        <!-- DIPERBAIKI: Cegah modal List tutup kalau Modal Form sedang Terbuka -->
+        <div @click.away="if(!modals.form && !modals.time && !modals.seat) modals.list = false" class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
             <div class="p-6 border-b flex justify-between items-center">
                 <h3 class="text-xl font-bold">Reservasi: <span class="text-brand-green" x-text="selectedDateString"></span></h3>
                 <button @click="modals.list = false" class="text-gray-400 hover:text-red-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
@@ -117,20 +118,20 @@
                         <p class="text-center text-gray-500 py-4">Belum ada reservasi pada tanggal ini.</p>
                     </template>
                     <template x-for="res in dayReservations" :key="res.id">
-                        <div class="border rounded-xl p-4 flex justify-between items-center hover:shadow-md transition">
+                        <div class="border rounded-xl p-4 flex justify-between items-center hover:shadow-md transition bg-gray-50">
                             <div>
                                 <div class="font-bold text-lg" x-text="res.name"></div>
                                 <div class="text-sm text-gray-600 mt-1">
-                                    <span class="inline-block bg-gray-100 px-2 py-1 rounded">No: <span x-text="res.id"></span></span>
-                                    <span class="inline-block bg-brand-yellow/30 text-yellow-800 px-2 py-1 rounded ml-2">Jam: <span x-text="res.time"></span></span>
-                                    <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded ml-2">Kursi: <span x-text="res.seat"></span></span>
+                                    <span class="inline-block bg-white border px-2 py-1 rounded">No: <span class="font-bold text-gray-800" x-text="res.id"></span></span>
+                                    <span class="inline-block bg-brand-yellow/30 text-yellow-800 border border-yellow-200 px-2 py-1 rounded ml-2">Jam: <span class="font-bold" x-text="res.time"></span></span>
+                                    <span class="inline-block bg-blue-100 text-blue-800 border border-blue-200 px-2 py-1 rounded ml-2">Kursi: <span class="font-bold" x-text="res.seat"></span></span>
                                 </div>
-                                <div class="text-sm text-gray-500 mt-2" x-text="res.details"></div>
+                                <div class="text-sm text-gray-500 mt-2 bg-white p-2 rounded border" x-text="res.details"></div>
                             </div>
-                            <div class="flex flex-col gap-2">
-                                <button @click="printTicket(res)" class="px-3 py-1 bg-gray-800 text-white text-sm rounded hover:bg-gray-700">Print A5</button>
-                                <button @click="openForm(res)" class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">Edit</button>
-                                <button @click="deleteRes(res.id)" class="px-3 py-1 bg-brand-red text-white text-sm rounded hover:bg-red-700">Hapus</button>
+                            <div class="flex flex-col gap-2 ml-4">
+                                <button @click="printTicket(res)" class="px-4 py-1 bg-gray-800 text-white text-sm font-semibold rounded hover:bg-gray-700 transition">Print A5</button>
+                                <button @click="openForm(res)" class="px-4 py-1 bg-blue-500 text-white text-sm font-semibold rounded hover:bg-blue-600 transition">Edit</button>
+                                <button @click="deleteRes(res.id)" class="px-4 py-1 bg-brand-red text-white text-sm font-semibold rounded hover:bg-red-700 transition">Hapus</button>
                             </div>
                         </div>
                     </template>
@@ -141,25 +142,32 @@
 
     <!-- Modal 2: Form Tambah/Edit -->
     <div x-show="modals.form" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display: none;">
-        <div @click.away="modals.form = false" class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
+        <!-- DIPERBAIKI: Cegah modal Form tertutup jika yang diklik adalah Modal Jam / Kursi -->
+        <div @click.away="if(!modals.time && !modals.seat) modals.form = false" class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            
+            <button @click="modals.form = false" class="absolute top-4 right-4 text-gray-400 hover:text-red-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
             <h3 class="text-xl font-bold mb-4" x-text="formData.id ? 'Edit Reservasi' : 'Tambah Reservasi'"></h3>
             
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Pemesan</label>
-                    <input type="text" x-model="formData.name" class="w-full border p-2 rounded-lg focus:ring-brand-green focus:border-brand-green outline-none" placeholder="Nama Lengkap">
+                    <input type="text" x-model="formData.name" class="w-full border p-3 rounded-lg focus:ring-brand-green focus:border-brand-green outline-none" placeholder="Nama Lengkap">
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Jam</label>
-                        <div @click="modals.time = true" class="w-full border p-2 rounded-lg cursor-pointer bg-gray-50 text-center font-bold text-brand-green hover:bg-gray-100">
+                        <div @click="modals.time = true" class="w-full border-2 border-brand-green p-3 rounded-lg cursor-pointer bg-brand-green/5 text-center font-bold text-brand-green hover:bg-brand-green/10 transition">
                             <span x-text="formData.time || 'Pilih Jam'"></span>
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Tempat Duduk</label>
-                        <div @click="openSeatPicker()" class="w-full border p-2 rounded-lg cursor-pointer bg-gray-50 text-center font-bold text-blue-600 hover:bg-gray-100" :class="!formData.time ? 'opacity-50 cursor-not-allowed' : ''">
+                        <div @click="openSeatPicker()" class="w-full border-2 p-3 rounded-lg cursor-pointer text-center font-bold transition" 
+                             :class="!formData.time ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'border-blue-500 bg-blue-50 text-blue-600 hover:bg-blue-100'">
                             <span x-text="formData.seat || 'Pilih Kursi'"></span>
                         </div>
                     </div>
@@ -167,26 +175,29 @@
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Detail Pesanan Menu</label>
-                    <textarea x-model="formData.details" rows="3" class="w-full border p-2 rounded-lg focus:ring-brand-green focus:border-brand-green outline-none" placeholder="Contoh: 2 Gurami Bakar, 1 Es Teh..."></textarea>
+                    <textarea x-model="formData.details" rows="3" class="w-full border p-3 rounded-lg focus:ring-brand-green focus:border-brand-green outline-none" placeholder="Contoh: 2 Gurami Bakar, 1 Es Teh..."></textarea>
                 </div>
             </div>
 
-            <div class="mt-6 flex justify-end gap-3">
-                <button @click="modals.form = false" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Batal</button>
-                <button @click="saveReservation()" class="px-4 py-2 bg-brand-green text-white rounded-lg hover:bg-green-700 font-bold">Simpan</button>
+            <div class="mt-6 flex justify-end gap-3 border-t pt-4">
+                <button @click="modals.form = false" class="px-5 py-2 border rounded-xl hover:bg-gray-50 font-semibold">Batal</button>
+                <button @click="saveReservation()" class="px-5 py-2 bg-brand-green text-white rounded-xl hover:bg-green-700 font-bold shadow-lg shadow-green-500/30">Simpan Data</button>
             </div>
         </div>
     </div>
 
     <!-- Modal 3: Time Picker -->
-    <div x-show="modals.time" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40" style="display: none;">
-        <div @click.away="modals.time = false" class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+    <div x-show="modals.time" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" style="display: none;">
+        <div @click.away="modals.time = false" class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
+            <button @click="modals.time = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
             <h3 class="text-lg font-bold mb-4 text-center">Pilih Jam Kedatangan</h3>
             <div class="grid grid-cols-2 gap-3">
                 <template x-for="time in timeSlots">
                     <button @click="selectTime(time)" 
                             class="p-3 border-2 rounded-xl font-bold hover:bg-brand-green hover:text-white hover:border-brand-green transition"
-                            :class="formData.time === time ? 'bg-brand-green text-white border-brand-green' : 'border-gray-200 text-gray-700'">
+                            :class="formData.time === time ? 'bg-brand-green text-white border-brand-green shadow-md' : 'border-gray-200 text-gray-700 bg-gray-50'">
                         <span x-text="time"></span> WIB
                     </button>
                 </template>
@@ -195,24 +206,28 @@
     </div>
 
     <!-- Modal 4: Seat Picker -->
-    <div x-show="modals.seat" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40" style="display: none;">
-        <div @click.away="modals.seat = false" class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
-            <h3 class="text-lg font-bold mb-2 text-center">Pilih Tempat Duduk</h3>
-            <p class="text-xs text-center text-gray-500 mb-4">Jam: <span x-text="formData.time" class="font-bold"></span></p>
+    <div x-show="modals.seat" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" style="display: none;">
+        <div @click.away="modals.seat = false" class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
+            <button @click="modals.seat = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="text-lg font-bold mb-1 text-center">Pilih Tempat Duduk</h3>
+            <p class="text-sm text-center text-gray-500 mb-4 bg-gray-100 py-1 rounded-lg">Pilihan untuk Jam: <span x-text="formData.time" class="font-bold text-brand-green"></span> WIB</p>
             
             <div class="grid grid-cols-5 gap-2">
                 <template x-for="seat in seatSlots">
                     <button @click="!isSeatBooked(seat) ? selectSeat(seat) : null" 
                             class="p-2 border-2 rounded-lg font-bold text-sm transition"
                             :class="{
-                                'bg-blue-500 text-white border-blue-500': formData.seat === seat,
-                                'bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed': isSeatBooked(seat),
-                                'border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-500': !isSeatBooked(seat) && formData.seat !== seat
+                                'bg-blue-500 text-white border-blue-500 shadow-md': formData.seat === seat,
+                                'bg-red-50 text-red-300 border-red-100 cursor-not-allowed line-through': isSeatBooked(seat),
+                                'border-gray-200 text-gray-700 bg-gray-50 hover:border-blue-500 hover:text-blue-500 hover:bg-blue-50': !isSeatBooked(seat) && formData.seat !== seat
                             }">
                         <span x-text="seat"></span>
                     </button>
                 </template>
             </div>
+            <p class="text-xs text-center text-red-400 mt-4">*Kursi yang dicoret sudah dipesan orang lain.</p>
         </div>
     </div>
 
@@ -247,7 +262,7 @@
                 </div>
                 <div>
                     <span class="font-bold text-gray-600 block mb-1">Detail Pesanan Menu:</span>
-                    <div class="p-3 bg-gray-100 rounded border text-sm" x-text="printData.details"></div>
+                    <div class="p-3 bg-gray-100 rounded border text-sm whitespace-pre-wrap" x-text="printData.details"></div>
                 </div>
             </div>
 
@@ -273,8 +288,8 @@
                 currentYear: new Date().getFullYear(),
                 selectedDate: null,
                 
-                // State Data
-                reservations: JSON.parse(localStorage.getItem('suharno2_reservations')) || [],
+                // State Data (Menggunakan LocalStorage)
+                reservations: JSON.parse(localStorage.getItem('suharno2_reservations')) ||[],
                 dayReservations:[],
                 
                 // State Modals
@@ -340,8 +355,9 @@
                     this.formData.time = time;
                     this.formData.seat = ''; // Reset kursi jika jam diubah
                     this.modals.time = false;
-                    // Langsung buka modal kursi setelah pilih jam
-                    setTimeout(() => { this.modals.seat = true; }, 300);
+                    
+                    // Sedikit delay agar transisi modal terlihat mulus
+                    setTimeout(() => { this.modals.seat = true; }, 150);
                 },
                 openSeatPicker() {
                     if(!this.formData.time) { alert('Silakan pilih Jam terlebih dahulu!'); return; }
@@ -352,13 +368,13 @@
                     this.modals.seat = false;
                 },
                 isSeatBooked(seat) {
-                    // Cek apakah kursi sudah dibooking di tanggal dan jam yang sama (kecuali sedang diedit)
+                    // Cek apakah kursi sudah dibooking di tanggal dan jam yang sama
                     let dateStr = this.getFormattedDate(this.selectedDate);
                     return this.reservations.some(r => 
                         r.date === dateStr && 
                         r.time === this.formData.time && 
                         r.seat === seat && 
-                        r.id !== this.formData.id
+                        r.id !== this.formData.id // Kecualikan data diri sendiri saat edit
                     );
                 },
 
@@ -372,19 +388,19 @@
                     let dateStr = this.getFormattedDate(this.selectedDate);
                     
                     if (this.formData.id) {
-                        // Update
+                        // Proses Update Data
                         let index = this.reservations.findIndex(r => r.id === this.formData.id);
                         this.reservations[index] = { ...this.formData, date: dateStr };
                     } else {
-                        // Create (Generate random ID ex: RSV-12345)
+                        // Proses Buat Data Baru (Generate ID)
                         let newId = 'RSV-' + Math.floor(10000 + Math.random() * 90000);
                         this.reservations.push({ ...this.formData, id: newId, date: dateStr });
                     }
 
-                    // Save ke LocalStorage
+                    // Save ke LocalStorage browser
                     localStorage.setItem('suharno2_reservations', JSON.stringify(this.reservations));
                     
-                    // Refresh tampilan list
+                    // Refresh tampilan list dan tutup form
                     this.dayReservations = this.getReservations(this.selectedDate);
                     this.modals.form = false;
                 },
@@ -401,10 +417,10 @@
                 // Print Data
                 printTicket(res) {
                     this.printData = res;
-                    // Jeda sebentar agar Alpine merender data ke DOM sebelum print dipanggil
+                    // Jeda agar DOM Alpine selesai merender sebelum perintah print dijalankan
                     setTimeout(() => {
                         window.print();
-                    }, 100);
+                    }, 200);
                 }
             }));
         });
