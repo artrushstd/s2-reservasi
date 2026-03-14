@@ -29,7 +29,7 @@
         /* Sembunyikan elemen print saat di layar */
         #print-area { display: none; }
         
-        /* Pengaturan khusus untuk Print */
+        /* Pengaturan khusus untuk Print A5 */
         @media print {
             @page { size: A5 portrait; margin: 1cm; }
             body * { visibility: hidden; }
@@ -98,11 +98,11 @@
     </main>
 
     <!-- ==================== MODAL AREA ==================== -->
+    <!-- (Semua @click.away telah dihapus agar form stabil & tidak mudah tertutup) -->
 
     <!-- Modal 1: List Reservasi Harian -->
     <div x-show="modals.list" class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
-        <!-- DIPERBAIKI: Cegah modal List tutup kalau Modal Form sedang Terbuka -->
-        <div @click.away="if(!modals.form && !modals.time && !modals.seat) modals.list = false" class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
+        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl relative">
             <div class="p-6 border-b flex justify-between items-center">
                 <h3 class="text-xl font-bold">Reservasi: <span class="text-brand-green" x-text="selectedDateString"></span></h3>
                 <button @click="modals.list = false" class="text-gray-400 hover:text-red-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
@@ -142,8 +142,7 @@
 
     <!-- Modal 2: Form Tambah/Edit -->
     <div x-show="modals.form" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display: none;">
-        <!-- DIPERBAIKI: Cegah modal Form tertutup jika yang diklik adalah Modal Jam / Kursi -->
-        <div @click.away="if(!modals.time && !modals.seat) modals.form = false" class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
             
             <button @click="modals.form = false" class="absolute top-4 right-4 text-gray-400 hover:text-red-500">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -188,7 +187,7 @@
 
     <!-- Modal 3: Time Picker -->
     <div x-show="modals.time" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" style="display: none;">
-        <div @click.away="modals.time = false" class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
             <button @click="modals.time = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
@@ -206,8 +205,8 @@
     </div>
 
     <!-- Modal 4: Seat Picker -->
-    <div x-show="modals.seat" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" style="display: none;">
-        <div @click.away="modals.seat = false" class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
+    <div x-show="modals.seat" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-sm" style="display: none;">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
             <button @click="modals.seat = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
@@ -315,7 +314,6 @@
                     return `${this.selectedDate} ${this.currentMonthName} ${this.currentYear}`;
                 },
                 getFormattedDate(day) {
-                    // Format seragam YYYY-MM-DD
                     return `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 },
 
@@ -354,9 +352,9 @@
                 selectTime(time) {
                     this.formData.time = time;
                     this.formData.seat = ''; // Reset kursi jika jam diubah
-                    this.modals.time = false;
+                    this.modals.time = false; // Tutup pop up jam
                     
-                    // Sedikit delay agar transisi modal terlihat mulus
+                    // Otomatis buka pop-up kursi setelah jam dipilih
                     setTimeout(() => { this.modals.seat = true; }, 150);
                 },
                 openSeatPicker() {
@@ -365,7 +363,7 @@
                 },
                 selectSeat(seat) {
                     this.formData.seat = seat;
-                    this.modals.seat = false;
+                    this.modals.seat = false; // Tutup pop-up kursi setelah dipilih
                 },
                 isSeatBooked(seat) {
                     // Cek apakah kursi sudah dibooking di tanggal dan jam yang sama
@@ -374,7 +372,7 @@
                         r.date === dateStr && 
                         r.time === this.formData.time && 
                         r.seat === seat && 
-                        r.id !== this.formData.id // Kecualikan data diri sendiri saat edit
+                        r.id !== this.formData.id // Kecualikan id diri sendiri saat diedit
                     );
                 },
 
