@@ -19,7 +19,7 @@
             theme: {
                 extend: {
                     colors: { brand: { green: '#297c3f', yellow: '#f4e918', red: '#e90023' } },
-                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] }
+                    fontFamily: { sans:['"Plus Jakarta Sans"', 'sans-serif'] }
                 }
             }
         }
@@ -58,11 +58,11 @@
     <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="bg-white rounded-2xl shadow-lg p-6">
             <div class="flex justify-between items-center mb-6">
-                <button @click="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded-full text-gray-600">
+                <button @click="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
                 <h2 class="text-2xl font-bold text-gray-800" x-text="currentMonthName + ' ' + currentYear"></h2>
-                <button @click="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded-full text-gray-600">
+                <button @click="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 </button>
             </div>
@@ -85,10 +85,10 @@
                         <!-- Indikator ada reservasi -->
                         <div class="mt-auto flex gap-1 flex-wrap">
                             <template x-for="res in getReservations(day).slice(0, 3)">
-                                <div class="w-full text-xs bg-brand-green/10 text-brand-green truncate px-1 rounded" x-text="res.time + ' ' + res.name"></div>
+                                <div class="w-full text-xs bg-brand-green/10 text-brand-green truncate px-1 rounded font-medium" x-text="res.time + ' ' + res.name"></div>
                             </template>
                             <template x-if="getReservations(day).length > 3">
-                                <div class="w-full text-xs text-gray-500 text-center">+<span x-text="getReservations(day).length - 3"></span> lagi</div>
+                                <div class="w-full text-xs text-gray-500 text-center font-bold">+<span x-text="getReservations(day).length - 3"></span> lagi</div>
                             </template>
                         </div>
                     </div>
@@ -98,40 +98,61 @@
     </main>
 
     <!-- ==================== MODAL AREA ==================== -->
-    <!-- (Semua @click.away telah dihapus agar form stabil & tidak mudah tertutup) -->
 
-    <!-- Modal 1: List Reservasi Harian -->
+    <!-- Modal 1: List Reservasi Harian dengan Search & Filter -->
     <div x-show="modals.list" class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
-        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl relative">
+        <div class="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl relative">
             <div class="p-6 border-b flex justify-between items-center">
                 <h3 class="text-xl font-bold">Reservasi: <span class="text-brand-green" x-text="selectedDateString"></span></h3>
-                <button @click="modals.list = false" class="text-gray-400 hover:text-red-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                <button @click="modals.list = false" class="text-gray-400 hover:text-red-500 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
             
             <div class="p-6 overflow-y-auto flex-1">
-                <button @click="openForm()" class="mb-4 w-full py-3 bg-brand-green text-white font-bold rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2">
+                <button @click="openForm()" class="mb-6 w-full py-3 bg-brand-green text-white font-bold rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-md">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Tambah Reservasi Baru
                 </button>
 
+                <!-- Fitur Pencarian & Filter Urutan -->
+                <div class="mb-4 flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-1">
+                        <svg class="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <input type="text" x-model="searchQuery" placeholder="Cari nama, No. RSV, Jam, Kursi..." class="w-full border border-gray-300 p-2.5 pl-10 rounded-xl focus:ring-brand-green focus:border-brand-green outline-none transition">
+                    </div>
+                    <select x-model="sortOrder" class="border border-gray-300 p-2.5 rounded-xl focus:ring-brand-green outline-none bg-white font-medium text-gray-700 transition cursor-pointer">
+                        <option value="newest">Terbaru Dibuat</option>
+                        <option value="oldest">Terlama Dibuat</option>
+                    </select>
+                </div>
+
                 <div class="space-y-4">
-                    <template x-if="dayReservations.length === 0">
-                        <p class="text-center text-gray-500 py-4">Belum ada reservasi pada tanggal ini.</p>
+                    <!-- Jika kosong / tidak ada hasil -->
+                    <template x-if="filteredAndSortedReservations.length === 0">
+                        <div class="text-center py-8">
+                            <p class="text-gray-500 font-medium" x-text="dayReservations.length === 0 ? 'Belum ada reservasi pada tanggal ini.' : 'Tidak ada hasil pencarian yang cocok.'"></p>
+                        </div>
                     </template>
-                    <template x-for="res in dayReservations" :key="res.id">
-                        <div class="border rounded-xl p-4 flex justify-between items-center hover:shadow-md transition bg-gray-50">
+
+                    <!-- List Item -->
+                    <template x-for="res in filteredAndSortedReservations" :key="res.id">
+                        <div class="border rounded-xl p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center hover:shadow-md transition bg-gray-50 gap-4">
                             <div>
-                                <div class="font-bold text-lg" x-text="res.name"></div>
-                                <div class="text-sm text-gray-600 mt-1">
-                                    <span class="inline-block bg-white border px-2 py-1 rounded">No: <span class="font-bold text-gray-800" x-text="res.id"></span></span>
-                                    <span class="inline-block bg-brand-yellow/30 text-yellow-800 border border-yellow-200 px-2 py-1 rounded ml-2">Jam: <span class="font-bold" x-text="res.time"></span></span>
-                                    <span class="inline-block bg-blue-100 text-blue-800 border border-blue-200 px-2 py-1 rounded ml-2">Kursi: <span class="font-bold" x-text="res.seat"></span></span>
+                                <div class="font-bold text-lg text-gray-900" x-text="res.name"></div>
+                                <div class="text-sm text-gray-600 mt-2 flex flex-wrap gap-2">
+                                    <span class="inline-flex items-center bg-white border px-2 py-1 rounded shadow-sm">No: <span class="font-bold text-gray-800 ml-1" x-text="res.id"></span></span>
+                                    <span class="inline-flex items-center bg-brand-yellow/30 text-yellow-800 border border-yellow-200 px-2 py-1 rounded shadow-sm">Jam: <span class="font-bold ml-1" x-text="res.time"></span></span>
+                                    <span class="inline-flex items-center bg-blue-100 text-blue-800 border border-blue-200 px-2 py-1 rounded shadow-sm">Kursi: <span class="font-bold ml-1" x-text="res.seat"></span></span>
+                                    <!-- BADGE STATUS PEMBAYARAN -->
+                                    <span class="inline-flex items-center border px-2 py-1 rounded shadow-sm font-bold"
+                                          :class="res.paymentStatus === 'Lunas' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-orange-100 text-orange-800 border-orange-200'"
+                                          x-text="res.paymentStatus || 'DP'">
+                                    </span>
                                 </div>
-                                <div class="text-sm text-gray-500 mt-2 bg-white p-2 rounded border" x-text="res.details"></div>
+                                <div class="text-sm text-gray-500 mt-3 bg-white p-2 rounded-lg border" x-text="res.details"></div>
                             </div>
-                            <div class="flex flex-col gap-2 ml-4">
-                                <button @click="printTicket(res)" class="px-4 py-1 bg-gray-800 text-white text-sm font-semibold rounded hover:bg-gray-700 transition">Print A5</button>
-                                <button @click="openForm(res)" class="px-4 py-1 bg-blue-500 text-white text-sm font-semibold rounded hover:bg-blue-600 transition">Edit</button>
-                                <button @click="deleteRes(res.id)" class="px-4 py-1 bg-brand-red text-white text-sm font-semibold rounded hover:bg-red-700 transition">Hapus</button>
+                            <div class="flex flex-row sm:flex-col gap-2">
+                                <button @click="printTicket(res)" class="flex-1 px-4 py-2 bg-gray-800 text-white text-sm font-semibold rounded-lg hover:bg-gray-700 transition">Print A5</button>
+                                <button @click="openForm(res)" class="flex-1 px-4 py-2 bg-blue-500 text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition">Edit</button>
+                                <button @click="deleteRes(res.id)" class="flex-1 px-4 py-2 bg-brand-red text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition">Hapus</button>
                             </div>
                         </div>
                     </template>
@@ -143,28 +164,43 @@
     <!-- Modal 2: Form Tambah/Edit -->
     <div x-show="modals.form" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display: none;">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
-            
-            <button @click="modals.form = false" class="absolute top-4 right-4 text-gray-400 hover:text-red-500">
+            <button @click="modals.form = false" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
 
             <h3 class="text-xl font-bold mb-4" x-text="formData.id ? 'Edit Reservasi' : 'Tambah Reservasi'"></h3>
             
             <div class="space-y-4">
+                <!-- Kolom Nama -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Pemesan</label>
-                    <input type="text" x-model="formData.name" class="w-full border p-3 rounded-lg focus:ring-brand-green focus:border-brand-green outline-none" placeholder="Nama Lengkap">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Pemesan <span class="text-red-500">*</span></label>
+                    <input type="text" 
+                           x-model="formData.name" 
+                           @input="nameError = ''" 
+                           class="w-full border p-3 rounded-lg outline-none transition"
+                           :class="nameError ? 'border-red-500 bg-red-50 focus:ring-red-500 text-red-700' : 'border-gray-200 focus:ring-brand-green focus:border-brand-green'"
+                           placeholder="Masukkan Nama Lengkap">
+                    
+                    <div x-show="nameError" x-collapse>
+                        <p class="text-sm text-red-600 font-bold mt-1.5 flex items-start gap-1">
+                            <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                            <span x-text="nameError"></span>
+                        </p>
+                    </div>
+                    <p x-show="!nameError" class="text-xs text-gray-500 mt-1.5">Nama tidak boleh sama persis dengan pemesan lain di hari yang sama.</p>
                 </div>
                 
+                <!-- Kolom Jam & Kursi -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Jam</label>
-                        <div @click="modals.time = true" class="w-full border-2 border-brand-green p-3 rounded-lg cursor-pointer bg-brand-green/5 text-center font-bold text-brand-green hover:bg-brand-green/10 transition">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Jam <span class="text-red-500">*</span></label>
+                        <div @click="checkNameAndOpenTimePicker()" class="w-full border-2 p-3 rounded-lg cursor-pointer text-center font-bold transition"
+                             :class="(!formData.name || formData.name.trim() === '') ? 'border-gray-200 bg-gray-100 text-gray-400' : 'border-brand-green bg-brand-green/5 text-brand-green hover:bg-brand-green/10'">
                             <span x-text="formData.time || 'Pilih Jam'"></span>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Tempat Duduk</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tempat Duduk <span class="text-red-500">*</span></label>
                         <div @click="openSeatPicker()" class="w-full border-2 p-3 rounded-lg cursor-pointer text-center font-bold transition" 
                              :class="!formData.time ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'border-blue-500 bg-blue-50 text-blue-600 hover:bg-blue-100'">
                             <span x-text="formData.seat || 'Pilih Kursi'"></span>
@@ -172,15 +208,41 @@
                     </div>
                 </div>
 
+                <!-- Kolom Status Pembayaran (BARU) -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Status Pembayaran <span class="text-red-500">*</span></label>
+                    <div class="flex gap-3">
+                        <label class="flex items-center gap-2 cursor-pointer border-2 p-3 rounded-lg flex-1 transition" 
+                               :class="formData.paymentStatus === 'DP' ? 'bg-orange-50 border-orange-400 shadow-sm' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'">
+                            <input type="radio" x-model="formData.paymentStatus" value="DP" class="hidden">
+                            <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors" 
+                                 :class="formData.paymentStatus === 'DP' ? 'border-orange-500' : 'border-gray-400'">
+                                <div class="w-2 h-2 rounded-full bg-orange-500" x-show="formData.paymentStatus === 'DP'"></div>
+                            </div>
+                            <span class="font-bold text-sm" :class="formData.paymentStatus === 'DP' ? 'text-orange-700' : 'text-gray-600'">DP (Uang Muka)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer border-2 p-3 rounded-lg flex-1 transition" 
+                               :class="formData.paymentStatus === 'Lunas' ? 'bg-green-50 border-green-500 shadow-sm' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'">
+                            <input type="radio" x-model="formData.paymentStatus" value="Lunas" class="hidden">
+                            <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors" 
+                                 :class="formData.paymentStatus === 'Lunas' ? 'border-green-600' : 'border-gray-400'">
+                                <div class="w-2 h-2 rounded-full bg-green-600" x-show="formData.paymentStatus === 'Lunas'"></div>
+                            </div>
+                            <span class="font-bold text-sm" :class="formData.paymentStatus === 'Lunas' ? 'text-green-700' : 'text-gray-600'">Lunas</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Kolom Detail Pesanan -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Detail Pesanan Menu</label>
-                    <textarea x-model="formData.details" rows="3" class="w-full border p-3 rounded-lg focus:ring-brand-green focus:border-brand-green outline-none" placeholder="Contoh: 2 Gurami Bakar, 1 Es Teh..."></textarea>
+                    <textarea x-model="formData.details" rows="3" class="w-full border border-gray-200 p-3 rounded-lg focus:ring-brand-green focus:border-brand-green outline-none transition" placeholder="Contoh: 2 Gurami Bakar, 1 Es Teh..."></textarea>
                 </div>
             </div>
 
             <div class="mt-6 flex justify-end gap-3 border-t pt-4">
-                <button @click="modals.form = false" class="px-5 py-2 border rounded-xl hover:bg-gray-50 font-semibold">Batal</button>
-                <button @click="saveReservation()" class="px-5 py-2 bg-brand-green text-white rounded-xl hover:bg-green-700 font-bold shadow-lg shadow-green-500/30">Simpan Data</button>
+                <button @click="modals.form = false" class="px-5 py-2 border rounded-xl hover:bg-gray-50 font-semibold transition">Batal</button>
+                <button @click="saveReservation()" class="px-5 py-2 bg-brand-green text-white rounded-xl hover:bg-green-700 font-bold shadow-lg shadow-green-500/30 transition">Simpan Data</button>
             </div>
         </div>
     </div>
@@ -188,7 +250,7 @@
     <!-- Modal 3: Time Picker -->
     <div x-show="modals.time" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" style="display: none;">
         <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
-            <button @click="modals.time = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+            <button @click="modals.time = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             <h3 class="text-lg font-bold mb-4 text-center">Pilih Jam Kedatangan</h3>
@@ -207,7 +269,7 @@
     <!-- Modal 4: Seat Picker -->
     <div x-show="modals.seat" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-sm" style="display: none;">
         <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
-            <button @click="modals.seat = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+            <button @click="modals.seat = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             <h3 class="text-lg font-bold mb-1 text-center">Pilih Tempat Duduk</h3>
@@ -226,7 +288,7 @@
                     </button>
                 </template>
             </div>
-            <p class="text-xs text-center text-red-400 mt-4">*Kursi yang dicoret sudah dipesan orang lain.</p>
+            <p class="text-xs text-center text-red-400 mt-4">*Kursi yang dicoret sudah dipesan orang lain pada jam tersebut.</p>
         </div>
     </div>
 
@@ -235,7 +297,7 @@
         <div class="border-4 border-gray-800 p-6 rounded-2xl">
             <div class="text-center border-b-2 border-dashed border-gray-300 pb-4 mb-4">
                 <h1 class="text-2xl font-extrabold uppercase tracking-widest">Pemancingan Suharno 2</h1>
-                <p class="text-sm">Tiket Bukti Reservasi Resmi</p>
+                <p class="text-sm font-semibold">Tiket Bukti Reservasi Resmi</p>
             </div>
             
             <div class="space-y-4">
@@ -254,6 +316,10 @@
                 <div class="flex justify-between border-b pb-2">
                     <span class="font-bold text-gray-600">Waktu Kedatangan:</span>
                     <span class="font-bold text-lg" x-text="printData.time + ' WIB'"></span>
+                </div>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="font-bold text-gray-600">Status Pembayaran:</span>
+                    <span class="font-bold text-lg uppercase" x-text="printData.paymentStatus || 'DP'"></span>
                 </div>
                 <div class="flex justify-between border-b pb-2">
                     <span class="font-bold text-gray-600">Tempat Duduk:</span>
@@ -287,15 +353,20 @@
                 currentYear: new Date().getFullYear(),
                 selectedDate: null,
                 
-                // State Data (Menggunakan LocalStorage)
-                reservations: JSON.parse(localStorage.getItem('suharno2_reservations')) ||[],
+                // State Data (Local Storage)
+                reservations: JSON.parse(localStorage.getItem('suharno2_reservations')) || [],
                 dayReservations:[],
                 
+                // State Filter & Search
+                searchQuery: '',
+                sortOrder: 'newest', // 'newest' | 'oldest'
+
                 // State Modals
                 modals: { list: false, form: false, time: false, seat: false },
                 
-                // State Form
-                formData: { id: null, name: '', time: '', seat: '', details: '' },
+                // State Form & Validasi (Default status pembayaran: DP)
+                formData: { id: null, name: '', time: '', seat: '', details: '', paymentStatus: 'DP', createdAt: null },
+                nameError: '',
                 printData: {},
 
                 // Inisialisasi Kalender
@@ -325,87 +396,160 @@
                     else { this.currentMonth = newMonth; }
                 },
 
-                // Baca Data per Tanggal
+                // Get Data per Hari
                 getReservations(day) {
                     let dateStr = this.getFormattedDate(day);
                     return this.reservations.filter(r => r.date === dateStr);
+                },
+
+                // Getter untuk Search dan Sorting
+                get filteredAndSortedReservations() {
+                    let filtered = this.dayReservations;
+                    
+                    // Eksekusi Pencarian
+                    if (this.searchQuery.trim() !== '') {
+                        const q = this.searchQuery.toLowerCase();
+                        filtered = filtered.filter(res => 
+                            res.name.toLowerCase().includes(q) ||
+                            res.id.toLowerCase().includes(q) ||
+                            res.time.includes(q) ||
+                            res.seat.toLowerCase().includes(q) ||
+                            (res.paymentStatus && res.paymentStatus.toLowerCase().includes(q))
+                        );
+                    }
+                    
+                    // Eksekusi Sorting (Berdasarkan timestamp createdAt)
+                    filtered = filtered.sort((a, b) => {
+                        const timeA = a.createdAt || 0;
+                        const timeB = b.createdAt || 0;
+                        if (this.sortOrder === 'newest') {
+                            return timeB - timeA; // Terbaru di atas
+                        } else {
+                            return timeA - timeB; // Terlama di atas
+                        }
+                    });
+                    
+                    return filtered;
                 },
 
                 // Aksi Buka Tanggal
                 openDay(day) {
                     this.selectedDate = day;
                     this.dayReservations = this.getReservations(day);
+                    this.searchQuery = ''; // Reset search
+                    this.sortOrder = 'newest'; // Reset sort
                     this.modals.list = true;
                 },
 
                 // Buka Form (Tambah/Edit)
                 openForm(res = null) {
+                    this.nameError = ''; // Reset error text
                     if (res) {
-                        this.formData = { ...res }; // Mode Edit
+                        this.formData = { ...res }; // Edit
+                        // Handle data lama yang belum punya status pembayaran
+                        if(!this.formData.paymentStatus) this.formData.paymentStatus = 'DP';
                     } else {
-                        this.formData = { id: null, name: '', time: '', seat: '', details: '' }; // Mode Tambah
+                        // Tambah Baru
+                        this.formData = { id: null, name: '', time: '', seat: '', details: '', paymentStatus: 'DP', createdAt: null }; 
                     }
                     this.modals.form = true;
+                },
+
+                // Validasi Nama
+                checkNameAndOpenTimePicker() {
+                    this.nameError = ''; 
+                    const inputName = this.formData.name.trim();
+                    
+                    if (!inputName) {
+                        this.nameError = 'Peringatan: Silakan isi Nama Pemesan terlebih dahulu!';
+                        return;
+                    }
+                    
+                    const nameExists = this.dayReservations.some(r => 
+                        r.name.trim().toLowerCase() === inputName.toLowerCase() && 
+                        r.id !== this.formData.id 
+                    );
+                    
+                    if (nameExists) {
+                        this.nameError = `Nama "${inputName}" sudah ada! Harap gunakan nama lain atau tambah angka (Contoh: ${inputName} 2).`;
+                        return;
+                    }
+                    
+                    this.modals.time = true;
                 },
 
                 // Pemilihan Jam & Kursi
                 selectTime(time) {
                     this.formData.time = time;
-                    this.formData.seat = ''; // Reset kursi jika jam diubah
-                    this.modals.time = false; // Tutup pop up jam
+                    this.formData.seat = ''; 
+                    this.modals.time = false; 
                     
-                    // Otomatis buka pop-up kursi setelah jam dipilih
                     setTimeout(() => { this.modals.seat = true; }, 150);
                 },
                 openSeatPicker() {
-                    if(!this.formData.time) { alert('Silakan pilih Jam terlebih dahulu!'); return; }
+                    if(!this.formData.time) { 
+                        alert('Silakan pilih Jam terlebih dahulu!'); 
+                        return; 
+                    }
                     this.modals.seat = true;
                 },
                 selectSeat(seat) {
                     this.formData.seat = seat;
-                    this.modals.seat = false; // Tutup pop-up kursi setelah dipilih
+                    this.modals.seat = false; 
                 },
+                
                 isSeatBooked(seat) {
-                    // Cek apakah kursi sudah dibooking di tanggal dan jam yang sama
                     let dateStr = this.getFormattedDate(this.selectedDate);
                     return this.reservations.some(r => 
                         r.date === dateStr && 
                         r.time === this.formData.time && 
                         r.seat === seat && 
-                        r.id !== this.formData.id // Kecualikan id diri sendiri saat diedit
+                        r.id !== this.formData.id
                     );
                 },
 
                 // Simpan Data
                 saveReservation() {
                     if(!this.formData.name || !this.formData.time || !this.formData.seat) {
-                        alert("Nama, Jam, dan Tempat Duduk wajib diisi!");
+                        alert("Gagal: Pastikan Nama, Jam, dan Tempat Duduk sudah terisi semua!");
+                        return;
+                    }
+
+                    // Validasi nama sekali lagi sebelum simpan
+                    const nameExists = this.dayReservations.some(r => 
+                        r.name.trim().toLowerCase() === this.formData.name.trim().toLowerCase() && 
+                        r.id !== this.formData.id
+                    );
+                    if (nameExists) {
+                        this.nameError = "Gagal Simpan: Nama ini sudah terdaftar!";
                         return;
                     }
 
                     let dateStr = this.getFormattedDate(this.selectedDate);
                     
                     if (this.formData.id) {
-                        // Proses Update Data
+                        // Update
                         let index = this.reservations.findIndex(r => r.id === this.formData.id);
                         this.reservations[index] = { ...this.formData, date: dateStr };
                     } else {
-                        // Proses Buat Data Baru (Generate ID)
+                        // Create
                         let newId = 'RSV-' + Math.floor(10000 + Math.random() * 90000);
-                        this.reservations.push({ ...this.formData, id: newId, date: dateStr });
+                        this.reservations.push({ 
+                            ...this.formData, 
+                            id: newId, 
+                            date: dateStr, 
+                            createdAt: Date.now() 
+                        });
                     }
 
-                    // Save ke LocalStorage browser
                     localStorage.setItem('suharno2_reservations', JSON.stringify(this.reservations));
-                    
-                    // Refresh tampilan list dan tutup form
                     this.dayReservations = this.getReservations(this.selectedDate);
                     this.modals.form = false;
                 },
 
                 // Hapus Data
                 deleteRes(id) {
-                    if(confirm("Yakin ingin menghapus reservasi ini?")) {
+                    if(confirm("Apakah Anda yakin ingin menghapus data reservasi ini?")) {
                         this.reservations = this.reservations.filter(r => r.id !== id);
                         localStorage.setItem('suharno2_reservations', JSON.stringify(this.reservations));
                         this.dayReservations = this.getReservations(this.selectedDate);
@@ -415,7 +559,6 @@
                 // Print Data
                 printTicket(res) {
                     this.printData = res;
-                    // Jeda agar DOM Alpine selesai merender sebelum perintah print dijalankan
                     setTimeout(() => {
                         window.print();
                     }, 200);
