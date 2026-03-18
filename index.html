@@ -35,63 +35,101 @@
         /* Pengaturan khusus untuk Print A5 */
         @media print {
             @page { size: A5 portrait; margin: 1cm; }
-            body * { visibility: hidden; }
-            #print-area { display: block; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+            body > *:not(#print-area) { display: none !important; }
+            #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
         }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800" x-data="reservationApp()">
+<body class="bg-gray-50 text-gray-800 font-sans antialiased" x-data="reservationApp()" x-init="initApp()">
+
+    <!-- Loading Overlay -->
+    <div x-show="isLoading" class="fixed inset-0 z-[100] flex items-center justify-center bg-white/80 backdrop-blur-sm transition-opacity" style="display: none;">
+        <div class="flex flex-col items-center">
+            <svg class="animate-spin h-10 w-10 text-brand-green mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-gray-600 font-semibold animate-pulse">Memproses Data...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="fixed top-5 right-5 z-[110] flex flex-col gap-3 pointer-events-none">
+        <template x-for="toast in toasts" :key="toast.id">
+            <div x-show="toast.show" x-transition.duration.300ms
+                 class="px-6 py-4 rounded-xl shadow-xl flex items-center gap-3 text-white pointer-events-auto min-w-[300px]"
+                 :class="toast.type === 'error' ? 'bg-red-500' : 'bg-brand-green'">
+                <svg x-show="toast.type === 'success'" class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <svg x-show="toast.type === 'error'" class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="font-bold text-sm" x-text="toast.message"></span>
+            </div>
+        </template>
+    </div>
 
     <!-- Header -->
-    <header class="bg-brand-green text-white shadow-md">
+    <header class="bg-brand-green text-white shadow-md sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-white text-brand-green rounded font-bold flex items-center justify-center">S2</div>
-                <h1 class="text-xl font-bold">Admin Reservasi</h1>
+                <div class="w-8 h-8 bg-white text-brand-green rounded font-extrabold flex items-center justify-center">S2</div>
+                <h1 class="text-xl font-bold tracking-tight">Admin Reservasi</h1>
             </div>
-            <div>
-                <span x-text="currentMonthName + ' ' + currentYear" class="font-semibold text-lg"></span>
+            <div class="flex items-center gap-4">
+                <button @click="initApp()" class="p-2 hover:bg-green-700 rounded-lg transition text-sm flex items-center gap-2" title="Refresh Data">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span class="hidden sm:inline">Refresh</span>
+                </button>
             </div>
         </div>
     </header>
 
     <!-- Main Content: Kalender -->
     <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="bg-white rounded-2xl shadow-lg p-6">
-            <div class="flex justify-between items-center mb-6">
-                <button @click="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition" title="Bulan Sebelumnya">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <button @click="changeMonth(-1)" class="p-2 bg-gray-50 hover:bg-gray-100 border rounded-xl text-gray-600 transition flex items-center justify-center w-full sm:w-auto" title="Bulan Sebelumnya">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
                 <h2 class="text-2xl font-bold text-gray-800" x-text="currentMonthName + ' ' + currentYear"></h2>
-                <button @click="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition" title="Bulan Selanjutnya">
+                <button @click="changeMonth(1)" class="p-2 bg-gray-50 hover:bg-gray-100 border rounded-xl text-gray-600 transition flex items-center justify-center w-full sm:w-auto" title="Bulan Selanjutnya">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 </button>
             </div>
 
             <!-- Header Hari -->
-            <div class="grid grid-cols-7 gap-2 text-center font-bold text-gray-500 mb-2">
+            <div class="grid grid-cols-7 gap-2 text-center font-bold text-gray-400 text-sm mb-2 uppercase tracking-wider">
                 <div>Min</div><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div>
             </div>
 
             <!-- Grid Tanggal -->
-            <div class="grid grid-cols-7 gap-2">
+            <div class="grid grid-cols-7 gap-2 sm:gap-3">
                 <template x-for="blank in blankDays">
-                    <div class="h-24 bg-gray-50 rounded-xl border border-gray-100"></div>
+                    <div class="h-24 bg-gray-50/50 rounded-xl border border-dashed border-gray-200"></div>
                 </template>
                 <template x-for="day in daysInMonth">
                     <div @click="openDay(day)" 
-                         class="h-24 border border-gray-200 rounded-xl p-2 cursor-pointer hover:border-brand-green hover:shadow-md transition relative bg-white flex flex-col items-center">
-                        <span class="text-sm font-semibold text-gray-700 self-start" x-text="day"></span>
+                         class="h-24 border rounded-xl p-2 cursor-pointer transition relative flex flex-col items-center group"
+                         :class="{
+                            'border-brand-green bg-green-50 shadow-sm': isToday(day),
+                            'border-gray-200 bg-white hover:border-brand-green hover:shadow-md hover:-translate-y-0.5': !isToday(day)
+                         }">
+                        <span class="text-sm font-semibold self-start" 
+                              :class="isToday(day) ? 'text-brand-green font-extrabold bg-green-100 px-2 py-0.5 rounded-md' : 'text-gray-700'" 
+                              x-text="day"></span>
                         
                         <!-- Indikator Total Reservasi -->
-                        <div class="mt-auto mb-2 w-full flex justify-center">
+                        <div class="mt-auto mb-1 w-full flex justify-center">
                             <template x-if="getReservations(day).length > 0">
-                                <div class="text-xs bg-brand-green text-white px-3 py-1 rounded-lg font-bold shadow-sm" x-text="getReservations(day).length + ' Reservasi'"></div>
+                                <div class="text-xs bg-brand-green text-white px-2.5 py-1 rounded-lg font-bold shadow-sm w-full text-center group-hover:bg-green-700 transition" 
+                                     x-text="getReservations(day).length + ' Booking'"></div>
                             </template>
                             <template x-if="getReservations(day).length === 0">
-                                <div class="text-xs text-gray-400 font-medium px-2 py-1">-</div>
+                                <div class="text-xs text-gray-300 font-medium px-2 py-1">-</div>
                             </template>
                         </div>
                     </div>
@@ -102,95 +140,88 @@
 
     <!-- ==================== MODAL AREA ==================== -->
 
-    <!-- Modal 1: List Reservasi Harian dengan Search & Filter -->
-    <div x-show="modals.list" class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
-        <div class="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl relative">
+    <!-- Modal 1: List Reservasi Harian -->
+    <div x-show="modals.list" class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;" x-transition.opacity>
+        <!-- Backdrop clickable -->
+        <div class="absolute inset-0" @click="modals.list = false"></div>
+        
+        <div class="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl relative z-10 mx-4" x-transition.scale.origin.bottom>
             
-            <div class="p-6 border-b flex items-center gap-4">
-                <button @click="modals.list = false" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition flex items-center justify-center" title="Kembali ke Kalender">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            <div class="p-5 border-b flex items-center gap-4 bg-gray-50 rounded-t-2xl">
+                <button @click="modals.list = false" class="p-2 bg-white border shadow-sm hover:bg-gray-100 text-gray-600 rounded-full transition flex items-center justify-center" title="Kembali ke Kalender">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
-                <h3 class="text-xl font-bold flex-1">Reservasi: <span class="text-brand-green" x-text="selectedDateString"></span></h3>
+                <h3 class="text-xl font-bold flex-1 text-gray-800">Reservasi: <span class="text-brand-green" x-text="selectedDateString"></span></h3>
             </div>
             
-            <div class="p-6 overflow-y-auto flex-1">
+            <div class="p-6 overflow-y-auto flex-1 bg-white">
                 <div class="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-                    <button @click="openForm()" class="py-3 px-6 bg-brand-green text-white font-bold rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-md">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Tambah Reservasi Baru
+                    <button @click="openForm()" class="py-2.5 px-6 bg-brand-green text-white font-bold rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-md shadow-green-600/20">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Tambah Booking Baru
                     </button>
 
                     <!-- Fitur Pencarian -->
                     <div class="flex gap-3 w-full sm:max-w-md">
                         <div class="relative flex-1">
                             <svg class="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                            <input type="text" x-model="searchQuery" placeholder="Cari nama, reservasi, metode..." class="w-full border border-gray-300 p-2.5 pl-10 rounded-xl focus:ring-brand-green focus:border-brand-green outline-none transition">
+                            <input type="text" x-model="searchQuery" placeholder="Cari nama, tiket, kursi..." class="w-full border border-gray-300 p-2.5 pl-10 rounded-xl focus:ring-brand-green focus:border-brand-green outline-none transition bg-gray-50 focus:bg-white">
                         </div>
                     </div>
                 </div>
 
-                <!-- Format List menggunakan Tabel -->
+                <!-- Format List Tabel -->
                 <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm bg-white">
                     <table class="w-full text-left text-sm whitespace-nowrap min-w-max">
                         <thead class="bg-gray-100 text-gray-600 font-bold border-b border-gray-200">
                             <tr>
                                 <th class="p-4 text-center w-12">No.</th>
-                                
-                                <!-- Kolom Sortable -->
-                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('id')" title="Urutkan No. Reservasi">
-                                    <div class="flex items-center gap-1">No. Reservasi</div>
-                                </th>
-                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('createdAt')" title="Urutkan Waktu Input">
-                                    <div class="flex items-center gap-1">Waktu Input</div>
-                                </th>
-                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('name')" title="Urutkan Nama">
-                                    <div class="flex items-center gap-1">Nama Pemesan</div>
-                                </th>
-                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('time')" title="Urutkan Jam">
-                                    <div class="flex items-center gap-1">Jam</div>
-                                </th>
-                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('seats')" title="Urutkan Kursi">
-                                    <div class="flex items-center gap-1">Kursi</div>
-                                </th>
-                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('paymentStatus')" title="Urutkan Pembayaran">
-                                    <div class="flex items-center gap-1">Status & Metode</div>
-                                </th>
-                                
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('id')">No. Tiket</th>
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('createdAt')">Input</th>
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('name')">Pemesan</th>
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('time')">Jam</th>
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('seats')">Kursi</th>
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('paymentStatus')">Pembayaran</th>
                                 <th class="p-4 text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             <template x-if="filteredAndSortedReservations.length === 0">
                                 <tr>
-                                    <td colspan="8" class="p-8 text-center text-gray-500 font-medium">
-                                        <span x-text="dayReservations.length === 0 ? 'Belum ada reservasi pada tanggal ini.' : 'Tidak ada hasil pencarian yang cocok.'"></span>
+                                    <td colspan="8" class="p-12 text-center">
+                                        <div class="flex flex-col items-center justify-center text-gray-400">
+                                            <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                            <p class="text-lg font-medium text-gray-500" x-text="dayReservations.length === 0 ? 'Belum ada reservasi pada tanggal ini.' : 'Pencarian tidak ditemukan.'"></p>
+                                        </div>
                                     </td>
                                 </tr>
                             </template>
 
                             <template x-for="(res, index) in filteredAndSortedReservations" :key="res.id">
-                                <tr class="hover:bg-gray-50 transition">
-                                    <td class="p-4 font-bold text-gray-500 text-center" x-text="index + 1"></td>
-                                    <td class="p-4 font-extrabold text-gray-800" x-text="res.id"></td>
-                                    <td class="p-4 text-gray-600 font-medium" x-text="formatDateTime(res.createdAt)"></td>
+                                <tr class="hover:bg-green-50/50 transition duration-150">
+                                    <td class="p-4 font-bold text-gray-400 text-center" x-text="index + 1"></td>
+                                    <td class="p-4 font-extrabold text-gray-700" x-text="res.id"></td>
+                                    <td class="p-4 text-gray-500 text-xs font-medium" x-text="formatDateTime(res.createdAt)"></td>
                                     <td class="p-4">
                                         <div class="font-bold text-gray-900 text-base" x-text="res.name"></div>
-                                        <div class="text-gray-500 text-xs mt-1 truncate max-w-[200px]" x-text="res.details || '-'" :title="res.details"></div>
+                                        <div class="text-gray-500 text-xs mt-0.5 truncate max-w-[150px]" x-text="res.details || '-'" :title="res.details"></div>
                                     </td>
                                     <td class="p-4">
-                                        <div class="text-brand-green font-bold bg-brand-green/10 px-2 py-1 rounded inline-block" x-text="res.time + ' WIB'"></div>
+                                        <div class="text-brand-green font-extrabold bg-green-100 border border-green-200 px-2 py-1 rounded inline-block shadow-sm" x-text="res.time + ' WIB'"></div>
                                     </td>
                                     <td class="p-4">
-                                        <div class="text-blue-600 font-semibold bg-blue-50 px-2 py-1 rounded inline-block truncate max-w-[150px]" 
+                                        <div class="text-blue-700 font-bold bg-blue-50 border border-blue-200 px-2 py-1 rounded inline-block truncate max-w-[150px]" 
                                              x-text="(res.seats ||[res.seat]).join(', ')" :title="(res.seats || [res.seat]).join(', ')"></div>
                                     </td>
                                     <td class="p-4">
-                                        <span class="inline-block px-2 py-1 rounded text-xs font-bold border"
-                                              :class="res.paymentStatus === 'Lunas' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-orange-100 text-orange-800 border-orange-200'"
-                                              x-text="res.paymentStatus || 'DP'"></span>
-                                        <span class="inline-block mt-1 px-2 py-1 rounded text-xs font-bold bg-gray-100 text-gray-700 border" 
-                                              x-text="res.paymentMethod || 'Cash'"></span>
+                                        <div class="flex flex-col gap-1 items-start">
+                                            <span class="px-2 py-0.5 rounded text-xs font-bold border shadow-sm"
+                                                  :class="res.paymentStatus === 'Lunas' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-orange-100 text-orange-800 border-orange-300'"
+                                                  x-text="res.paymentStatus || 'DP'"></span>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200 uppercase" 
+                                                  x-text="res.paymentMethod || 'Cash'"></span>
+                                        </div>
                                     </td>
-                                    <td class="p-4 text-center space-x-2">
+                                    <td class="p-4 text-center space-x-1">
                                         <button @click="printTicket(res)" class="p-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition shadow-sm" title="Print Tiket">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                                         </button>
@@ -211,26 +242,27 @@
     </div>
 
     <!-- Modal 2: Form Tambah/Edit -->
-    <div x-show="modals.form" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display: none;">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative max-h-[95vh] overflow-y-auto">
+    <div x-show="modals.form" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display: none;" x-transition.opacity>
+        <div class="absolute inset-0" @click="modals.form = false"></div>
+        <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl relative z-10 max-h-[95vh] overflow-y-auto mx-4" x-transition.scale.origin.center>
             
-            <div class="flex items-center gap-3 mb-6 border-b pb-4">
-                <button @click="modals.form = false" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition flex items-center justify-center" title="Kembali">
+            <div class="flex items-center gap-3 mb-6 border-b pb-4 border-gray-100">
+                <button @click="modals.form = false" class="p-2 bg-gray-50 border hover:bg-gray-100 text-gray-600 rounded-full transition flex items-center justify-center">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
-                <h3 class="text-xl font-bold flex-1" x-text="formData.id ? 'Edit Reservasi' : 'Tambah Reservasi'"></h3>
+                <h3 class="text-xl font-extrabold flex-1 text-gray-800" x-text="formData.id ? 'Edit Data Reservasi' : 'Form Reservasi Baru'"></h3>
             </div>
             
-            <div class="space-y-4">
+            <div class="space-y-5">
                 <!-- Kolom Nama -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Pemesan <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-bold text-gray-700 mb-1.5">Nama Pemesan <span class="text-red-500">*</span></label>
                     <input type="text" 
                            x-model="formData.name" 
                            @input="nameError = ''" 
-                           class="w-full border p-3 rounded-lg outline-none transition"
-                           :class="nameError ? 'border-red-500 bg-red-50 focus:ring-red-500 text-red-700' : 'border-gray-200 focus:ring-brand-green focus:border-brand-green'"
-                           placeholder="Masukkan Nama Lengkap">
+                           class="w-full border p-3 rounded-xl outline-none transition bg-gray-50 focus:bg-white"
+                           :class="nameError ? 'border-red-400 focus:ring-red-500 text-red-700' : 'border-gray-200 focus:ring-2 focus:ring-brand-green/30 focus:border-brand-green'"
+                           placeholder="Masukkan nama lengkap pelanggan">
                     
                     <div x-show="nameError" x-collapse>
                         <p class="text-sm text-red-600 font-bold mt-1.5 flex items-start gap-1">
@@ -243,16 +275,16 @@
                 <!-- Kolom Jam & Kursi -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Jam <span class="text-red-500">*</span></label>
-                        <div @click="checkNameAndOpenTimePicker()" class="w-full border-2 p-3 rounded-lg cursor-pointer text-center font-bold transition"
-                             :class="(!formData.name || formData.name.trim() === '') ? 'border-gray-200 bg-gray-100 text-gray-400' : 'border-brand-green bg-brand-green/5 text-brand-green hover:bg-brand-green/10'">
-                            <span x-text="formData.time || 'Pilih Jam'"></span>
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Pilih Jam <span class="text-red-500">*</span></label>
+                        <div @click="checkNameAndOpenTimePicker()" class="w-full border-2 p-3 rounded-xl cursor-pointer text-center font-extrabold transition"
+                             :class="(!formData.name || formData.name.trim() === '') ? 'border-gray-200 bg-gray-50 text-gray-400' : 'border-brand-green bg-green-50 text-brand-green hover:bg-green-100 shadow-sm'">
+                            <span x-text="formData.time ? formData.time + ' WIB' : 'Pilih Jam'"></span>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tempat Duduk <span class="text-red-500">*</span></label>
-                        <div @click="openSeatPicker()" class="w-full border-2 p-3 rounded-lg cursor-pointer text-center font-bold transition overflow-hidden text-ellipsis whitespace-nowrap" 
-                             :class="!formData.time ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'border-blue-500 bg-blue-50 text-blue-600 hover:bg-blue-100'"
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">Tempat Duduk <span class="text-red-500">*</span></label>
+                        <div @click="openSeatPicker()" class="w-full border-2 p-3 rounded-xl cursor-pointer text-center font-extrabold transition overflow-hidden text-ellipsis whitespace-nowrap" 
+                             :class="!formData.time ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed' : 'border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100 shadow-sm'"
                              :title="formData.seats.join(', ')">
                             <span x-text="formData.seats.length > 0 ? formData.seats.join(', ') : 'Pilih Kursi'"></span>
                         </div>
@@ -260,37 +292,36 @@
                 </div>
 
                 <!-- Kolom Status & Metode Pembayaran -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Status Pembayaran <span class="text-red-500">*</span></label>
-                    <div class="flex gap-3">
-                        <label class="flex items-center gap-2 cursor-pointer border-2 p-3 rounded-lg flex-1 transition" 
-                               :class="formData.paymentStatus === 'DP' ? 'bg-orange-50 border-orange-400 shadow-sm' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'">
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <label class="block text-sm font-bold text-gray-800 mb-3">Status & Metode Pembayaran</label>
+                    <div class="flex gap-3 mb-4">
+                        <label class="flex items-center gap-2 cursor-pointer border-2 p-2.5 rounded-lg flex-1 transition bg-white" 
+                               :class="formData.paymentStatus === 'DP' ? 'border-orange-400 ring-2 ring-orange-400/20' : 'border-gray-200 hover:border-orange-300'">
                             <input type="radio" x-model="formData.paymentStatus" value="DP" class="hidden">
                             <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors" 
-                                 :class="formData.paymentStatus === 'DP' ? 'border-orange-500' : 'border-gray-400'">
+                                 :class="formData.paymentStatus === 'DP' ? 'border-orange-500' : 'border-gray-300'">
                                 <div class="w-2 h-2 rounded-full bg-orange-500" x-show="formData.paymentStatus === 'DP'"></div>
                             </div>
-                            <span class="font-bold text-sm" :class="formData.paymentStatus === 'DP' ? 'text-orange-700' : 'text-gray-600'">DP (Uang Muka)</span>
+                            <span class="font-bold text-sm text-gray-700">DP (Uang Muka)</span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer border-2 p-3 rounded-lg flex-1 transition" 
-                               :class="formData.paymentStatus === 'Lunas' ? 'bg-green-50 border-green-500 shadow-sm' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'">
+                        <label class="flex items-center gap-2 cursor-pointer border-2 p-2.5 rounded-lg flex-1 transition bg-white" 
+                               :class="formData.paymentStatus === 'Lunas' ? 'border-green-500 ring-2 ring-green-500/20' : 'border-gray-200 hover:border-green-300'">
                             <input type="radio" x-model="formData.paymentStatus" value="Lunas" class="hidden">
                             <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors" 
-                                 :class="formData.paymentStatus === 'Lunas' ? 'border-green-600' : 'border-gray-400'">
+                                 :class="formData.paymentStatus === 'Lunas' ? 'border-green-600' : 'border-gray-300'">
                                 <div class="w-2 h-2 rounded-full bg-green-600" x-show="formData.paymentStatus === 'Lunas'"></div>
                             </div>
-                            <span class="font-bold text-sm" :class="formData.paymentStatus === 'Lunas' ? 'text-green-700' : 'text-gray-600'">Lunas</span>
+                            <span class="font-bold text-sm text-gray-700">Lunas</span>
                         </label>
                     </div>
 
-                    <div class="mt-3">
-                        <label class="block text-xs font-semibold text-gray-500 mb-2">Metode Pembayaran <span class="text-red-500">*</span></label>
+                    <div>
                         <div class="flex gap-2">
                             <template x-for="method in['Transfer', 'Qris', 'Cash']">
-                                <label class="flex-1 flex items-center justify-center gap-1 cursor-pointer border-2 py-2 px-1 rounded-lg transition"
-                                       :class="formData.paymentMethod === method ? 'bg-blue-50 border-blue-500 shadow-sm text-blue-700' : 'bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-600'">
+                                <label class="flex-1 flex items-center justify-center gap-1 cursor-pointer border-2 py-2 px-1 rounded-lg transition bg-white"
+                                       :class="formData.paymentMethod === method ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'">
                                     <input type="radio" x-model="formData.paymentMethod" :value="method" class="hidden">
-                                    <span class="font-bold text-sm" x-text="method"></span>
+                                    <span class="font-bold text-xs uppercase tracking-wide" x-text="method"></span>
                                 </label>
                             </template>
                         </div>
@@ -299,32 +330,36 @@
 
                 <!-- Kolom Detail Pesanan -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Detail Pesanan Menu</label>
-                    <textarea x-model="formData.details" rows="3" class="w-full border border-gray-200 p-3 rounded-lg focus:ring-brand-green focus:border-brand-green outline-none transition" placeholder="Contoh: 2 Gurami Bakar, 1 Es Teh..."></textarea>
+                    <label class="block text-sm font-bold text-gray-700 mb-1.5">Catatan / Detail Pesanan Menu</label>
+                    <textarea x-model="formData.details" rows="3" class="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-brand-green/30 focus:border-brand-green outline-none transition bg-gray-50 focus:bg-white" placeholder="Contoh: 2 Gurami Bakar, 1 Es Teh, Tambah Sambal..."></textarea>
                 </div>
             </div>
 
-            <div class="mt-6 flex justify-end gap-3 border-t pt-4">
-                <button @click="modals.form = false" class="px-5 py-2 border rounded-xl hover:bg-gray-50 font-semibold transition">Batal</button>
-                <button @click="saveReservation()" class="px-5 py-2 bg-brand-green text-white rounded-xl hover:bg-green-700 font-bold shadow-lg shadow-green-500/30 transition">Simpan Data</button>
+            <div class="mt-8 flex justify-end gap-3 border-t border-gray-100 pt-5">
+                <button @click="modals.form = false" class="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-100 font-bold transition">Batal</button>
+                <button @click="saveReservation()" class="px-6 py-2.5 bg-brand-green text-white rounded-xl hover:bg-green-700 font-bold shadow-lg shadow-green-600/30 transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Simpan Data
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal 3 & 4 (Time & Seat Picker) -->
-    <div x-show="modals.time" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" style="display: none;">
-        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <!-- Modal 3: Time Picker -->
+    <div x-show="modals.time" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;" x-transition.opacity>
+        <div class="absolute inset-0" @click="modals.time = false"></div>
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative z-10" x-transition.scale>
             <div class="flex items-center gap-3 mb-6">
-                <button @click="modals.time = false" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition flex items-center justify-center">
+                <button @click="modals.time = false" class="p-2 bg-gray-50 border hover:bg-gray-100 text-gray-600 rounded-full transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
-                <h3 class="text-lg font-bold flex-1">Pilih Jam Kedatangan</h3>
+                <h3 class="text-lg font-bold flex-1 text-gray-800">Pilih Jam Datang</h3>
             </div>
             <div class="grid grid-cols-3 gap-3">
                 <template x-for="time in timeSlots">
                     <button @click="selectTime(time)" 
-                            class="py-2 border-2 rounded-xl font-bold hover:bg-brand-green hover:text-white hover:border-brand-green transition"
-                            :class="formData.time === time ? 'bg-brand-green text-white border-brand-green shadow-md' : 'border-gray-200 text-gray-700 bg-gray-50'">
+                            class="py-2.5 border-2 rounded-xl font-bold hover:bg-brand-green hover:text-white hover:border-brand-green transition"
+                            :class="formData.time === time ? 'bg-brand-green text-white border-brand-green shadow-md' : 'border-gray-200 text-gray-700 bg-white'">
                         <span x-text="time"></span>
                     </button>
                 </template>
@@ -332,91 +367,117 @@
         </div>
     </div>
 
-    <div x-show="modals.seat" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-sm" style="display: none;">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+    <!-- Modal 4: Seat Picker -->
+    <div x-show="modals.seat" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;" x-transition.opacity>
+        <div class="absolute inset-0" @click="modals.seat = false"></div>
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative z-10 mx-4" x-transition.scale>
             <div class="flex items-center gap-3 mb-2">
-                <button @click="modals.seat = false" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition flex items-center justify-center">
+                <button @click="modals.seat = false" class="p-2 bg-gray-50 border hover:bg-gray-100 text-gray-600 rounded-full transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
-                <h3 class="text-lg font-bold flex-1">Pilih Tempat Duduk</h3>
+                <h3 class="text-lg font-bold flex-1 text-gray-800">Denah Tempat Duduk</h3>
             </div>
-            <p class="text-sm text-center text-gray-500 mb-4 bg-gray-100 py-1 rounded-lg">Pilihan untuk Jam: <span x-text="formData.time" class="font-bold text-brand-green"></span> WIB</p>
+            
+            <div class="bg-green-50 border border-green-200 rounded-xl p-2 mb-5 flex justify-center items-center gap-2">
+                <svg class="w-5 h-5 text-brand-green" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="text-sm font-medium text-gray-700">Jam Terpilih: <strong class="text-brand-green text-base" x-text="formData.time"></strong> WIB</span>
+            </div>
             
             <div class="flex flex-wrap gap-1.5 mb-4 justify-center">
                 <template x-for="letter in seatLetters">
                     <button @click="selectedSeatLetter = letter" 
-                            class="w-8 h-8 rounded border text-sm font-bold transition shadow-sm"
-                            :class="selectedSeatLetter === letter ? 'bg-brand-green text-white border-brand-green' : 'bg-white text-gray-700 hover:bg-gray-100 border-gray-300'"
+                            class="w-8 h-8 rounded border text-sm font-extrabold transition shadow-sm"
+                            :class="selectedSeatLetter === letter ? 'bg-gray-800 text-white border-gray-800 ring-2 ring-gray-300' : 'bg-white text-gray-600 hover:bg-gray-100 border-gray-300'"
                             x-text="letter"></button>
                 </template>
             </div>
-            <div class="grid grid-cols-5 gap-2 border-t pt-4">
+            
+            <div class="grid grid-cols-5 gap-2 border-t border-gray-100 pt-5">
                 <template x-for="i in 10">
                     <button @click="toggleSeat(selectedSeatLetter + i)" 
                             class="p-2 border-2 rounded-lg font-bold text-sm transition relative overflow-hidden"
                             :class="{
-                                'bg-blue-500 text-white border-blue-500 shadow-md': formData.seats.includes(selectedSeatLetter + i),
-                                'bg-red-50 text-red-300 border-red-100 cursor-not-allowed line-through': isSeatBooked(selectedSeatLetter + i) && !formData.seats.includes(selectedSeatLetter + i),
-                                'border-gray-200 text-gray-700 bg-gray-50 hover:border-blue-500 hover:text-blue-500 hover:bg-blue-50': !isSeatBooked(selectedSeatLetter + i) && !formData.seats.includes(selectedSeatLetter + i)
+                                'bg-brand-green text-white border-brand-green shadow-md scale-105': formData.seats.includes(selectedSeatLetter + i),
+                                'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60': isSeatBooked(selectedSeatLetter + i) && !formData.seats.includes(selectedSeatLetter + i),
+                                'border-gray-200 text-gray-700 bg-white hover:border-brand-green hover:text-brand-green': !isSeatBooked(selectedSeatLetter + i) && !formData.seats.includes(selectedSeatLetter + i)
                             }">
-                        <span x-text="selectedSeatLetter + i"></span>
+                        <!-- Ikon silang untuk kursi terisi -->
+                        <svg x-show="isSeatBooked(selectedSeatLetter + i) && !formData.seats.includes(selectedSeatLetter + i)" class="absolute inset-0 w-full h-full text-gray-300/50 p-1 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        
+                        <span class="relative z-10" x-text="selectedSeatLetter + i"></span>
                     </button>
                 </template>
             </div>
-            <p class="text-xs text-center text-red-400 mt-4">*Kursi dicoret berarti sudah dibooking dan terkunci otomatis selama 3 Jam.</p>
-            <button @click="modals.seat = false" class="w-full mt-4 py-2.5 bg-brand-green text-white font-bold rounded-lg hover:bg-green-700 transition">Selesai Pilih Kursi</button>
+            
+            <div class="mt-5 text-[11px] text-gray-500 bg-gray-50 p-2 rounded border border-gray-100 flex gap-2 items-start">
+                <svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <p>Kursi abu-abu redup (disilang) telah dibooking oleh pelanggan lain dan otomatis terkunci selama 3 jam dari jam pemesanan mereka.</p>
+            </div>
+            
+            <button @click="modals.seat = false" class="w-full mt-5 py-3 bg-gray-800 text-white font-bold rounded-xl hover:bg-black transition shadow-lg">Selesai Pilih Kursi</button>
         </div>
     </div>
 
     <!-- Elemen Tersembunyi untuk Print A5 -->
     <div id="print-area" class="bg-white text-black p-8 font-sans">
-        <div class="border-4 border-gray-800 p-6 rounded-2xl">
-            <div class="text-center border-b-2 border-dashed border-gray-300 pb-4 mb-4">
-                <h1 class="text-2xl font-extrabold uppercase tracking-widest">Pemancingan Suharno 2</h1>
-                <p class="text-sm font-semibold">Tiket Bukti Reservasi Resmi</p>
+        <div class="border-4 border-gray-800 p-6 rounded-2xl relative">
+            <div class="absolute top-6 right-6 font-extrabold text-3xl text-gray-200">S2</div>
+            <div class="text-center border-b-2 border-dashed border-gray-400 pb-4 mb-6">
+                <h1 class="text-2xl font-black uppercase tracking-widest text-gray-900">Pemancingan Suharno 2</h1>
+                <p class="text-sm font-semibold text-gray-600 mt-1">E-TIKET RESERVASI RESMI</p>
             </div>
             <div class="space-y-4">
-                <div class="flex justify-between border-b pb-2">
-                    <span class="font-bold text-gray-600">No. Reservasi:</span>
-                    <span class="font-bold text-lg" x-text="printData.id"></span>
+                <div class="flex justify-between border-b border-gray-200 pb-2">
+                    <span class="font-bold text-gray-500">No. Bukti / Tiket:</span>
+                    <span class="font-extrabold text-lg tracking-wider" x-text="printData.id"></span>
                 </div>
-                <div class="flex justify-between border-b pb-2">
-                    <span class="font-bold text-gray-600">Nama Pemesan:</span>
-                    <span class="font-bold text-lg" x-text="printData.name"></span>
+                <div class="flex justify-between border-b border-gray-200 pb-2">
+                    <span class="font-bold text-gray-500">Nama Pelanggan:</span>
+                    <span class="font-bold text-lg text-gray-900 uppercase" x-text="printData.name"></span>
                 </div>
-                <div class="flex justify-between border-b pb-2">
-                    <span class="font-bold text-gray-600">Tanggal:</span>
+                <div class="flex justify-between border-b border-gray-200 pb-2">
+                    <span class="font-bold text-gray-500">Tgl. Kedatangan:</span>
                     <span class="font-bold text-lg" x-text="printData.date"></span>
                 </div>
-                <div class="flex justify-between border-b pb-2">
-                    <span class="font-bold text-gray-600">Waktu Kedatangan:</span>
-                    <span class="font-bold text-lg" x-text="printData.time + ' WIB'"></span>
+                <div class="flex justify-between border-b border-gray-200 pb-2">
+                    <span class="font-bold text-gray-500">Jam Kedatangan:</span>
+                    <span class="font-bold text-lg px-2 border-2 border-black rounded" x-text="printData.time + ' WIB'"></span>
                 </div>
-                <div class="flex justify-between border-b pb-2">
-                    <span class="font-bold text-gray-600">Pembayaran:</span>
-                    <span class="font-bold text-lg uppercase" x-text="(printData.paymentStatus || 'DP') + ' - ' + (printData.paymentMethod || 'Cash')"></span>
+                <div class="flex justify-between border-b border-gray-200 pb-2">
+                    <span class="font-bold text-gray-500">Status Bayar:</span>
+                    <span class="font-bold text-lg uppercase" x-text="(printData.paymentStatus || 'DP') + ' via ' + (printData.paymentMethod || 'CASH')"></span>
                 </div>
-                <div class="flex justify-between border-b pb-2">
-                    <span class="font-bold text-gray-600">Tempat Duduk:</span>
-                    <span class="font-bold text-xl" x-text="printData.seats ? printData.seats.join(', ') : printData.seat"></span>
+                <div class="flex justify-between border-b border-gray-200 pb-2">
+                    <span class="font-bold text-gray-500">Spot / Kursi:</span>
+                    <span class="font-extrabold text-2xl" x-text="printData.seats ? printData.seats.join(', ') : printData.seat"></span>
                 </div>
-                <div>
-                    <span class="font-bold text-gray-600 block mb-1">Detail Pesanan Menu:</span>
-                    <div class="p-3 bg-gray-100 rounded border text-sm whitespace-pre-wrap" x-text="printData.details"></div>
+                <div class="pt-2">
+                    <span class="font-bold text-gray-500 block mb-2">Catatan Pesanan / Menu:</span>
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-300 text-sm whitespace-pre-wrap font-medium" x-text="printData.details || '- Tidak ada catatan -'"></div>
                 </div>
+            </div>
+            <div class="mt-8 text-center text-[10px] text-gray-500 leading-relaxed border-t-2 border-gray-800 pt-4 font-bold">
+                <p>SIMPAN DAN TUNJUKKAN TIKET INI (CETAK/FOTO) KEPADA KASIR SAAT KEDATANGAN.</p>
+                <p>KURSI YANG DIPILIH BERLAKU MAKSIMAL 3 JAM DARI WAKTU KEDATANGAN TERTERA.</p>
             </div>
         </div>
     </div>
 
-    <!-- Script Logic Aplikasi -->
     <script>
         // Konfigurasi Supabase
+        // PENTING: Pastikan Anda telah mengaktifkan RLS (Row Level Security) di tabel 'reservations' 
+        // pada dashboard Supabase Anda jika aplikasi ini bisa diakses publik secara online.
         const SUPABASE_URL = 'https://vceqfpfdncilebiywult.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjZXFmcGZkbmNpbGViaXl3dWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODU0MzgsImV4cCI6MjA4OTM2MTQzOH0.iypgbCGhJ1UUxfgetQki9Sh-g2jz0XvIgDnKrAeHscU';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         document.addEventListener('alpine:init', () => {
             Alpine.data('reservationApp', () => ({
+                // UI States
+                isLoading: false,
+                toasts:[],
+                toastCount: 0,
+
                 // Data Konfigurasi
                 monthNames:['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
                 timeSlots: Array.from({length: 14}, (_, i) => String(i + 7).padStart(2, '0') + ':00'),
@@ -429,7 +490,7 @@
                 currentYear: new Date().getFullYear(),
                 selectedDate: null,
                 
-                // State Data (menggunakan Supabase sekarang)
+                // State Data
                 reservations: [],
                 dayReservations:[],
                 
@@ -446,20 +507,40 @@
                 nameError: '',
                 printData: {},
 
-                async init() {
-                    // Ambil data dari Supabase saat aplikasi dibuka
-                    const { data, error } = await supabaseClient
-                        .from('reservations')
-                        .select('*');
-                    
-                    if (error) {
-                        console.error(error);
-                    } else {
+                // Menampilkan Notifikasi Melayang
+                showToast(message, type = 'success') {
+                    const id = this.toastCount++;
+                    this.toasts.push({ id, message, type, show: true });
+                    setTimeout(() => {
+                        const index = this.toasts.findIndex(t => t.id === id);
+                        if(index > -1) this.toasts[index].show = false;
+                        // Hapus dari array setelah transisi selesai
+                        setTimeout(() => {
+                            this.toasts = this.toasts.filter(t => t.id !== id);
+                        }, 300);
+                    }, 3000);
+                },
+
+                async initApp() {
+                    this.isLoading = true;
+                    try {
+                        const { data, error } = await supabaseClient
+                            .from('reservations')
+                            .select('*');
+                        
+                        if (error) throw error;
                         this.reservations = data ||[];
+                        
+                        // Perbarui list di modal jika modal sedang terbuka
+                        if (this.selectedDate) {
+                            this.dayReservations = this.getReservations(this.selectedDate);
+                        }
+                    } catch (error) {
+                        console.error("Gagal mengambil data:", error);
+                        this.showToast("Gagal terhubung ke database!", "error");
+                    } finally {
+                        this.isLoading = false;
                     }
-                    
-                    // Render kalender
-                    this.currentDate = new Date();
                 },
 
                 get daysInMonth() {
@@ -478,6 +559,10 @@
                 },
                 getFormattedDate(day) {
                     return `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                },
+                isToday(day) {
+                    const today = new Date();
+                    return day === today.getDate() && this.currentMonth === today.getMonth() && this.currentYear === today.getFullYear();
                 },
                 
                 formatDateTime(timestamp) {
@@ -518,7 +603,7 @@
                     if (this.searchQuery.trim() !== '') {
                         const q = this.searchQuery.toLowerCase();
                         filtered = filtered.filter(res => {
-                            let seatStr = (res.seats ||[res.seat]).join(', ').toLowerCase();
+                            let seatStr = (res.seats || [res.seat]).join(', ').toLowerCase();
                             return res.name.toLowerCase().includes(q) ||
                                 res.id.toLowerCase().includes(q) ||
                                 res.time.includes(q) ||
@@ -533,22 +618,13 @@
                         let valA, valB;
 
                         switch(this.sortColumn) {
-                            case 'id':
-                                valA = a.id; valB = b.id; break;
-                            case 'createdAt':
-                                valA = a.createdAt; valB = b.createdAt; break;
-                            case 'name':
-                                valA = a.name.toLowerCase(); valB = b.name.toLowerCase(); break;
-                            case 'time':
-                                valA = a.time; valB = b.time; break;
-                            case 'seats':
-                                valA = (a.seats ||[a.seat]).join(', '); valB = (b.seats || [b.seat]).join(', '); break;
-                            case 'paymentStatus':
-                                valA = (a.paymentStatus || 'DP') + (a.paymentMethod || 'Cash'); 
-                                valB = (b.paymentStatus || 'DP') + (b.paymentMethod || 'Cash'); 
-                                break;
-                            default:
-                                valA = a.createdAt; valB = b.createdAt;
+                            case 'id': valA = a.id; valB = b.id; break;
+                            case 'createdAt': valA = a.createdAt; valB = b.createdAt; break;
+                            case 'name': valA = a.name.toLowerCase(); valB = b.name.toLowerCase(); break;
+                            case 'time': valA = a.time; valB = b.time; break;
+                            case 'seats': valA = (a.seats || [a.seat]).join(', '); valB = (b.seats || [b.seat]).join(', '); break;
+                            case 'paymentStatus': valA = (a.paymentStatus || 'DP'); valB = (b.paymentStatus || 'DP'); break;
+                            default: valA = a.createdAt; valB = b.createdAt;
                         }
 
                         if (valA < valB) return -1 * modifier;
@@ -562,11 +638,9 @@
                 openDay(day) {
                     this.selectedDate = day;
                     this.dayReservations = this.getReservations(day);
-                    
                     this.searchQuery = '';
                     this.sortColumn = 'createdAt';
                     this.sortDirection = 'desc'; 
-                    
                     this.modals.list = true;
                 },
 
@@ -590,7 +664,7 @@
                     const inputName = this.formData.name.trim();
                     
                     if (!inputName) {
-                        this.nameError = 'Peringatan: Silakan isi Nama Pemesan terlebih dahulu!';
+                        this.nameError = 'Silakan isi Nama Pemesan terlebih dahulu!';
                         return;
                     }
                     
@@ -600,7 +674,7 @@
                     );
                     
                     if (nameExists) {
-                        this.nameError = `Nama "${inputName}" sudah terdaftar pada tanggal ini! Harap gunakan nama lain.`;
+                        this.nameError = `Nama "${inputName}" sudah ada di hari ini! Gunakan nama lain.`;
                         return;
                     }
                     
@@ -618,7 +692,7 @@
                 
                 openSeatPicker() {
                     if(!this.formData.time) { 
-                        alert('Silakan pilih Jam terlebih dahulu!'); 
+                        this.showToast('Silakan pilih Jam terlebih dahulu!', 'error'); 
                         return; 
                     }
                     this.modals.seat = true;
@@ -643,7 +717,7 @@
                         if (r.id === this.formData.id) return false;
                         
                         let resHour = parseInt(r.time.split(':')[0]);
-                        
+                        // Logika overlap 3 Jam
                         let overlap = Math.max(selectedHour, resHour) < Math.min(selectedHour + 3, resHour + 3);
                         
                         if (overlap) {
@@ -656,51 +730,72 @@
 
                 async saveReservation() {
                     if(!this.formData.name || !this.formData.time || this.formData.seats.length === 0) {
-                        alert("Gagal: Data tidak lengkap!");
+                        this.showToast("Gagal: Lengkapi Nama, Jam, dan Kursi!", "error");
                         return;
                     }
 
-                    let dateStr = this.getFormattedDate(this.selectedDate);
-                    let payload = { ...this.formData, date: dateStr };
+                    this.isLoading = true;
+                    try {
+                        let dateStr = this.getFormattedDate(this.selectedDate);
+                        let payload = { ...this.formData, date: dateStr };
 
-                    if (this.formData.id) {
-                        // Update Data ke Supabase
-                        const { error } = await supabaseClient
-                            .from('reservations')
-                            .update(payload)
-                            .eq('id', this.formData.id);
-                        if (error) alert(error.message);
-                    } else {
-                        // Insert Data Baru ke Supabase (Buat ID dulu)
-                        payload.id = `S2-${dateStr.replace(/-/g,'').substring(2)}-${Math.floor(Math.random()*1000)}`;
-                        payload.created_at = new Date();
-                        // Ditambahkan untuk memastikan render & sorting di UI AlpineJS tidak error
-                        payload.createdAt = new Date().getTime(); 
-                        
-                        const { error } = await supabaseClient
-                            .from('reservations')
-                            .insert([payload]);
-                        if (error) alert(error.message);
+                        if (this.formData.id) {
+                            // Update Data
+                            const { error } = await supabaseClient
+                                .from('reservations')
+                                .update(payload)
+                                .eq('id', this.formData.id);
+                            
+                            if (error) throw error;
+                            this.showToast("Data berhasil diperbarui!");
+                        } else {
+                            // Insert Data Baru (ID Generator base36)
+                            const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+                            const dateCode = dateStr.replace(/-/g, '').substring(2);
+                            payload.id = `S2-${dateCode}-${randomStr}`;
+                            
+                            payload.created_at = new Date();
+                            payload.createdAt = new Date().getTime(); 
+                            
+                            const { error } = await supabaseClient
+                                .from('reservations')
+                                .insert([payload]);
+                                
+                            if (error) throw error;
+                            this.showToast("Reservasi berhasil ditambahkan!");
+                        }
+
+                        // Refresh List Modal UI
+                        await this.initApp();
+                        this.modals.form = false;
+                    } catch (error) {
+                        console.error("Error saving:", error);
+                        this.showToast(error.message || "Gagal menyimpan data!", "error");
+                    } finally {
+                        this.isLoading = false;
                     }
-
-                    // Refresh data setelah simpan
-                    await this.init(); 
-                    this.dayReservations = this.getReservations(this.selectedDate);
-                    this.modals.form = false;
                 },
 
                 async deleteRes(id) {
-                    if(confirm("Hapus permanen dari database?")) {
-                        const { error } = await supabaseClient
-                            .from('reservations')
-                            .delete()
-                            .eq('id', id);
-                        
-                        if (error) alert(error.message);
-                        
-                        // Refresh data
-                        await this.init();
-                        this.dayReservations = this.getReservations(this.selectedDate);
+                    if(confirm("Apakah Anda yakin ingin menghapus data ini secara permanen?")) {
+                        this.isLoading = true;
+                        try {
+                            const { error } = await supabaseClient
+                                .from('reservations')
+                                .delete()
+                                .eq('id', id);
+                            
+                            if (error) throw error;
+                            this.showToast("Reservasi berhasil dihapus.");
+                            
+                            // Refresh
+                            await this.initApp();
+                        } catch (error) {
+                            console.error("Error deleting:", error);
+                            this.showToast("Gagal menghapus data!", "error");
+                        } finally {
+                            this.isLoading = false;
+                        }
                     }
                 },
 
