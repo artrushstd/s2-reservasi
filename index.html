@@ -568,13 +568,13 @@
                 </div>
                 <!-- Filter & Search Log -->
                 <div class="flex gap-2 items-center">
-                    <select x-model="logFilter.action" class="text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 bg-white">
+                    <select x-model="logFilter.action" @change="updateLogComputed()" class="text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 bg-white">
                         <option value="">Semua Aksi</option>
                         <option value="INSERT">Tambah</option>
                         <option value="UPDATE">Edit</option>
                         <option value="DELETE">Hapus</option>
                     </select>
-                    <input type="text" x-model="logFilter.search" placeholder="Cari nama / ID..." class="text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 bg-white w-44">
+                    <input type="text" x-model="logFilter.search" @input="updateLogComputed()" placeholder="Cari nama / ID..." class="text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 bg-white w-44">
                     <button type="button" @click="loadLogs()" class="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition" title="Refresh Log">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     </button>
@@ -778,32 +778,9 @@
                     return [];
                 },
 
-                // ─── COMPUTED: statistik log ───
-                get logStats() {
-                    return {
-                        insert: this.activityLogs.filter(l => l.action === 'INSERT').length,
-                        update: this.activityLogs.filter(l => l.action === 'UPDATE').length,
-                        delete: this.activityLogs.filter(l => l.action === 'DELETE').length,
-                    };
-                },
-
-                // ─── COMPUTED: log terfilter ───
-                get filteredLogs() {
-                    let logs = [...this.activityLogs];
-                    if (this.logFilter.action) {
-                        logs = logs.filter(l => l.action === this.logFilter.action);
-                    }
-                    if (this.logFilter.search.trim()) {
-                        const q = this.logFilter.search.toLowerCase();
-                        logs = logs.filter(l =>
-                            (l.customer_name || '').toLowerCase().includes(q) ||
-                            (l.reservation_id || '').toLowerCase().includes(q) ||
-                            (l.actor || '').toLowerCase().includes(q) ||
-                            (l.detail || '').toLowerCase().includes(q)
-                        );
-                    }
-                    return logs;
-                },
+                // ─── DATA: log computed (diupdate manual karena Alpine tidak support getter) ───
+                logStats: { insert: 0, update: 0, delete: 0 },
+                filteredLogs: [],
 
                 showToast(message, type = 'success') {
                     const id = this.toastCount++;
@@ -1217,6 +1194,32 @@
                     await this.loadLogs();
                 },
 
+                // Update logStats dan filteredLogs berdasarkan activityLogs + filter aktif
+                updateLogComputed() {
+                    const logs = this.activityLogs || [];
+                    // Hitung statistik dari SEMUA data (tidak terpengaruh filter)
+                    this.logStats = {
+                        insert: logs.filter(l => l.action === 'INSERT').length,
+                        update: logs.filter(l => l.action === 'UPDATE').length,
+                        delete: logs.filter(l => l.action === 'DELETE').length,
+                    };
+                    // Terapkan filter
+                    let filtered = [...logs];
+                    if (this.logFilter.action) {
+                        filtered = filtered.filter(l => l.action === this.logFilter.action);
+                    }
+                    if ((this.logFilter.search || '').trim()) {
+                        const q = this.logFilter.search.toLowerCase();
+                        filtered = filtered.filter(l =>
+                            (l.customer_name || '').toLowerCase().includes(q) ||
+                            (l.reservation_id || '').toLowerCase().includes(q) ||
+                            (l.actor || '').toLowerCase().includes(q) ||
+                            (l.detail || '').toLowerCase().includes(q)
+                        );
+                    }
+                    this.filteredLogs = filtered;
+                },
+
                 async loadLogs() {
                     this.logLoading = true;
                     try {
@@ -1229,14 +1232,17 @@
                             console.error('loadLogs error:', error);
                             this.showToast('Gagal memuat log: ' + (error.message || JSON.stringify(error)), 'error');
                             this.activityLogs = [];
+                            this.updateLogComputed();
                             return;
                         }
                         console.log('loadLogs sukses, jumlah data:', (data || []).length);
                         this.activityLogs = data || [];
+                        this.updateLogComputed();
                     } catch(e) {
                         console.error('loadLogs exception:', e);
                         this.showToast('Gagal memuat log: ' + e.message, 'error');
                         this.activityLogs = [];
+                        this.updateLogComputed();
                     } finally {
                         this.logLoading = false;
                     }
