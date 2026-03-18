@@ -662,7 +662,7 @@
                                     </td>
                                     <td class="p-3 font-mono text-xs font-bold text-gray-700" x-text="log.reservation_id || '-'"></td>
                                     <td class="p-3 font-bold text-gray-800" x-text="log.customer_name || '-'"></td>
-                                    <td class="p-3 text-xs text-gray-600" x-text="log.reservation_date || '-'"></td>
+                                    <td class="p-3 text-xs text-gray-600" x-text="formatDate(log.reservation_date)"></td>
                                     <td class="p-3 text-xs text-gray-500 max-w-xs">
                                         <div class="truncate" :title="log.detail" x-text="log.detail || '-'"></div>
                                     </td>
@@ -778,6 +778,33 @@
                     return [];
                 },
 
+                // ─── COMPUTED: statistik log ───
+                get logStats() {
+                    return {
+                        insert: this.activityLogs.filter(l => l.action === 'INSERT').length,
+                        update: this.activityLogs.filter(l => l.action === 'UPDATE').length,
+                        delete: this.activityLogs.filter(l => l.action === 'DELETE').length,
+                    };
+                },
+
+                // ─── COMPUTED: log terfilter ───
+                get filteredLogs() {
+                    let logs = [...this.activityLogs];
+                    if (this.logFilter.action) {
+                        logs = logs.filter(l => l.action === this.logFilter.action);
+                    }
+                    if (this.logFilter.search.trim()) {
+                        const q = this.logFilter.search.toLowerCase();
+                        logs = logs.filter(l =>
+                            (l.customer_name || '').toLowerCase().includes(q) ||
+                            (l.reservation_id || '').toLowerCase().includes(q) ||
+                            (l.actor || '').toLowerCase().includes(q) ||
+                            (l.detail || '').toLowerCase().includes(q)
+                        );
+                    }
+                    return logs;
+                },
+
                 showToast(message, type = 'success') {
                     const id = this.toastCount++;
                     this.toasts.push({ id, message, type, show: true });
@@ -823,7 +850,7 @@
                         this.currentUser = { role: '', name: '' };
                         this.reservations = [];
                         this.dayReservations = [];
-                        this.modals = { list: false, form: false, time: false, seat: false };
+                        this.modals = { list: false, form: false, time: false, seat: false, log: false };
                         this.loginForm.password = '';
                         this.loginForm.error = '';
                     }
@@ -901,6 +928,13 @@
                     const d = new Date(timestamp);
                     if (isNaN(d.getTime())) return '-';
                     return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                },
+                formatDate(dateStr) {
+                    if (!dateStr) return '-';
+                    // handle YYYY-MM-DD string
+                    const parts = String(dateStr).split('-');
+                    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    return dateStr;
                 },
                 changeMonth(step) {
                     const newMonth = this.currentMonth + step;
@@ -1191,10 +1225,18 @@
                             .select('*')
                             .order('ts', { ascending: false })
                             .limit(500);
-                        if (error) throw error;
+                        if (error) {
+                            console.error('loadLogs error:', error);
+                            this.showToast('Gagal memuat log: ' + (error.message || JSON.stringify(error)), 'error');
+                            this.activityLogs = [];
+                            return;
+                        }
+                        console.log('loadLogs sukses, jumlah data:', (data || []).length);
                         this.activityLogs = data || [];
                     } catch(e) {
+                        console.error('loadLogs exception:', e);
                         this.showToast('Gagal memuat log: ' + e.message, 'error');
+                        this.activityLogs = [];
                     } finally {
                         this.logLoading = false;
                     }
