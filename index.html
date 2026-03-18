@@ -144,12 +144,60 @@
                         <thead class="bg-gray-100 text-gray-600 font-bold border-b border-gray-200">
                             <tr>
                                 <th class="p-4 text-center w-12">No.</th>
-                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('id')">No. Reservasi</th>
-                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('createdAt')">Waktu Input</th>
-                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('name')">Nama Pemesan</th>
-                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('time')">Jam</th>
-                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('seats')">Kursi</th>
-                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('paymentStatus')">Pembayaran</th>
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('id')">
+                                    <div class="flex items-center gap-1.5">
+                                        <span>No. Reservasi</span>
+                                        <span class="flex flex-col leading-none">
+                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'id' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>
+                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'id' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('createdAt')">
+                                    <div class="flex items-center gap-1.5">
+                                        <span>Waktu Input</span>
+                                        <span class="flex flex-col leading-none">
+                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'createdAt' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>
+                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'createdAt' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('name')">
+                                    <div class="flex items-center gap-1.5">
+                                        <span>Nama Pemesan</span>
+                                        <span class="flex flex-col leading-none">
+                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'name' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>
+                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'name' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('time')">
+                                    <div class="flex items-center gap-1.5">
+                                        <span>Jam</span>
+                                        <span class="flex flex-col leading-none">
+                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'time' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>
+                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'time' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('seats')">
+                                    <div class="flex items-center gap-1.5">
+                                        <span>Kursi</span>
+                                        <span class="flex flex-col leading-none">
+                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'seats' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>
+                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'seats' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
+                                        </span>
+                                    </div>
+                                </th>
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('paymentStatus')">
+                                    <div class="flex items-center gap-1.5">
+                                        <span>Pembayaran</span>
+                                        <span class="flex flex-col leading-none">
+                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'paymentStatus' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>
+                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'paymentStatus' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
+                                        </span>
+                                    </div>
+                                </th>
                                 <th class="p-4 text-center">Aksi</th>
                             </tr>
                         </thead>
