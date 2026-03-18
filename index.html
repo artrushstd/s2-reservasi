@@ -58,11 +58,11 @@
     <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="bg-white rounded-2xl shadow-lg p-6">
             <div class="flex justify-between items-center mb-6">
-                <button @click="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition">
+                <button @click="changeMonth(-1)" class="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition" title="Bulan Sebelumnya">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
                 <h2 class="text-2xl font-bold text-gray-800" x-text="currentMonthName + ' ' + currentYear"></h2>
-                <button @click="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition">
+                <button @click="changeMonth(1)" class="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition" title="Bulan Selanjutnya">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 </button>
             </div>
@@ -102,9 +102,13 @@
     <!-- Modal 1: List Reservasi Harian dengan Search & Filter -->
     <div x-show="modals.list" class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
         <div class="bg-white rounded-2xl w-full max-w-6xl max-h-[90vh] flex flex-col shadow-2xl relative">
-            <div class="p-6 border-b flex justify-between items-center">
-                <h3 class="text-xl font-bold">Reservasi: <span class="text-brand-green" x-text="selectedDateString"></span></h3>
-                <button @click="modals.list = false" class="text-gray-400 hover:text-red-500 transition"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+            
+            <!-- HEADER MODAL 1 DENGAN TOMBOL BACK -->
+            <div class="p-6 border-b flex items-center gap-4">
+                <button @click="modals.list = false" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition flex items-center justify-center" title="Kembali ke Kalender">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <h3 class="text-xl font-bold flex-1">Reservasi: <span class="text-brand-green" x-text="selectedDateString"></span></h3>
             </div>
             
             <div class="p-6 overflow-y-auto flex-1">
@@ -113,16 +117,12 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Tambah Reservasi Baru
                     </button>
 
-                    <!-- Fitur Pencarian & Filter Urutan -->
-                    <div class="flex gap-3 flex-1 sm:max-w-md">
+                    <!-- Fitur Pencarian -->
+                    <div class="flex gap-3 w-full sm:max-w-md">
                         <div class="relative flex-1">
                             <svg class="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                            <input type="text" x-model="searchQuery" placeholder="Cari..." class="w-full border border-gray-300 p-2.5 pl-10 rounded-xl focus:ring-brand-green focus:border-brand-green outline-none transition">
+                            <input type="text" x-model="searchQuery" placeholder="Cari nama, reservasi, metode..." class="w-full border border-gray-300 p-2.5 pl-10 rounded-xl focus:ring-brand-green focus:border-brand-green outline-none transition">
                         </div>
-                        <select x-model="sortOrder" class="border border-gray-300 p-2.5 rounded-xl focus:ring-brand-green outline-none bg-white font-medium text-gray-700 transition cursor-pointer">
-                            <option value="newest">Input Terbaru</option>
-                            <option value="oldest">Input Terlama</option>
-                        </select>
                     </div>
                 </div>
 
@@ -131,13 +131,74 @@
                     <table class="w-full text-left text-sm whitespace-nowrap min-w-max">
                         <thead class="bg-gray-100 text-gray-600 font-bold border-b border-gray-200">
                             <tr>
-                                <th class="p-4 text-center">No.</th>
-                                <th class="p-4">No. Reservasi</th>
-                                <th class="p-4">Waktu Input</th>
-                                <th class="p-4">Nama Pemesan & Detail</th>
-                                <th class="p-4">Jam</th>
-                                <th class="p-4">Kursi</th>
-                                <th class="p-4">Status & Metode</th>
+                                <th class="p-4 text-center w-12">No.</th>
+                                
+                                <!-- Kolom Sortable: No. Reservasi -->
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('id')" title="Urutkan No. Reservasi">
+                                    <div class="flex items-center gap-1">
+                                        No. Reservasi
+                                        <div class="flex flex-col">
+                                            <svg class="w-3 h-3 -mb-1" :class="sortColumn === 'id' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>
+                                            <svg class="w-3 h-3" :class="sortColumn === 'id' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                                        </div>
+                                    </div>
+                                </th>
+
+                                <!-- Kolom Sortable: Waktu Input -->
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('createdAt')" title="Urutkan Waktu Input">
+                                    <div class="flex items-center gap-1">
+                                        Waktu Input
+                                        <div class="flex flex-col">
+                                            <svg class="w-3 h-3 -mb-1" :class="sortColumn === 'createdAt' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>
+                                            <svg class="w-3 h-3" :class="sortColumn === 'createdAt' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                                        </div>
+                                    </div>
+                                </th>
+
+                                <!-- Kolom Sortable: Nama Pemesan -->
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('name')" title="Urutkan Nama">
+                                    <div class="flex items-center gap-1">
+                                        Nama Pemesan
+                                        <div class="flex flex-col">
+                                            <svg class="w-3 h-3 -mb-1" :class="sortColumn === 'name' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>
+                                            <svg class="w-3 h-3" :class="sortColumn === 'name' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                                        </div>
+                                    </div>
+                                </th>
+
+                                <!-- Kolom Sortable: Jam -->
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('time')" title="Urutkan Jam">
+                                    <div class="flex items-center gap-1">
+                                        Jam
+                                        <div class="flex flex-col">
+                                            <svg class="w-3 h-3 -mb-1" :class="sortColumn === 'time' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>
+                                            <svg class="w-3 h-3" :class="sortColumn === 'time' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                                        </div>
+                                    </div>
+                                </th>
+
+                                <!-- Kolom Sortable: Kursi -->
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('seats')" title="Urutkan Kursi">
+                                    <div class="flex items-center gap-1">
+                                        Kursi
+                                        <div class="flex flex-col">
+                                            <svg class="w-3 h-3 -mb-1" :class="sortColumn === 'seats' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>
+                                            <svg class="w-3 h-3" :class="sortColumn === 'seats' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                                        </div>
+                                    </div>
+                                </th>
+
+                                <!-- Kolom Sortable: Status & Metode -->
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none" @click="sortBy('paymentStatus')" title="Urutkan Pembayaran">
+                                    <div class="flex items-center gap-1">
+                                        Status & Metode
+                                        <div class="flex flex-col">
+                                            <svg class="w-3 h-3 -mb-1" :class="sortColumn === 'paymentStatus' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>
+                                            <svg class="w-3 h-3" :class="sortColumn === 'paymentStatus' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                                        </div>
+                                    </div>
+                                </th>
+                                
                                 <th class="p-4 text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -152,33 +213,32 @@
 
                             <template x-for="(res, index) in filteredAndSortedReservations" :key="res.id">
                                 <tr class="hover:bg-gray-50 transition">
-                                    <!-- Kolom 1: Nomor Urut -->
                                     <td class="p-4 font-bold text-gray-500 text-center" x-text="index + 1"></td>
-
-                                    <!-- Kolom 2: Nomor Reservasi -->
+                                    
+                                    <!-- Nomor Reservasi -->
                                     <td class="p-4 font-extrabold text-gray-800" x-text="res.id"></td>
                                     
-                                    <!-- Kolom 3: Waktu Input -->
+                                    <!-- Waktu Input -->
                                     <td class="p-4 text-gray-600 font-medium" x-text="formatDateTime(res.createdAt)"></td>
                                     
-                                    <!-- Kolom 4: Nama & Detail -->
+                                    <!-- Nama Pemesan -->
                                     <td class="p-4">
                                         <div class="font-bold text-gray-900 text-base" x-text="res.name"></div>
                                         <div class="text-gray-500 text-xs mt-1 truncate max-w-[200px]" x-text="res.details || '-'" :title="res.details"></div>
                                     </td>
                                     
-                                    <!-- Kolom 5: Jam -->
+                                    <!-- Jam -->
                                     <td class="p-4">
                                         <div class="text-brand-green font-bold bg-brand-green/10 px-2 py-1 rounded inline-block" x-text="res.time + ' WIB'"></div>
                                     </td>
-
-                                    <!-- Kolom 6: Kursi -->
+                                    
+                                    <!-- Kursi -->
                                     <td class="p-4">
                                         <div class="text-blue-600 font-semibold bg-blue-50 px-2 py-1 rounded inline-block truncate max-w-[150px]" 
                                              x-text="(res.seats || [res.seat]).join(', ')" :title="(res.seats || [res.seat]).join(', ')"></div>
                                     </td>
                                     
-                                    <!-- Kolom 7: Pembayaran -->
+                                    <!-- Status Pembayaran -->
                                     <td class="p-4">
                                         <span class="inline-block px-2 py-1 rounded text-xs font-bold border"
                                               :class="res.paymentStatus === 'Lunas' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-orange-100 text-orange-800 border-orange-200'"
@@ -187,7 +247,7 @@
                                               x-text="res.paymentMethod || 'Cash'"></span>
                                     </td>
                                     
-                                    <!-- Kolom 8: Aksi -->
+                                    <!-- Aksi -->
                                     <td class="p-4 text-center space-x-2">
                                         <button @click="printTicket(res)" class="p-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition shadow-sm" title="Print Tiket">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
@@ -211,11 +271,14 @@
     <!-- Modal 2: Form Tambah/Edit -->
     <div x-show="modals.form" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display: none;">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative max-h-[95vh] overflow-y-auto">
-            <button @click="modals.form = false" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-
-            <h3 class="text-xl font-bold mb-4" x-text="formData.id ? 'Edit Reservasi' : 'Tambah Reservasi'"></h3>
+            
+            <!-- HEADER MODAL 2 DENGAN TOMBOL BACK -->
+            <div class="flex items-center gap-3 mb-6 border-b pb-4">
+                <button @click="modals.form = false" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition flex items-center justify-center" title="Kembali">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <h3 class="text-xl font-bold flex-1" x-text="formData.id ? 'Edit Reservasi' : 'Tambah Reservasi'"></h3>
+            </div>
             
             <div class="space-y-4">
                 <!-- Kolom Nama -->
@@ -311,10 +374,15 @@
     <!-- Modal 3: Time Picker -->
     <div x-show="modals.time" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm" style="display: none;">
         <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button @click="modals.time = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h3 class="text-lg font-bold mb-4 text-center">Pilih Jam Kedatangan</h3>
+            
+            <!-- HEADER MODAL 3 DENGAN TOMBOL BACK -->
+            <div class="flex items-center gap-3 mb-6">
+                <button @click="modals.time = false" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition flex items-center justify-center" title="Kembali ke Form">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <h3 class="text-lg font-bold flex-1">Pilih Jam Kedatangan</h3>
+            </div>
+
             <div class="grid grid-cols-3 gap-3">
                 <template x-for="time in timeSlots">
                     <button @click="selectTime(time)" 
@@ -330,7 +398,15 @@
     <!-- Modal 4: Seat Picker -->
     <div x-show="modals.seat" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-sm" style="display: none;">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
-            <h3 class="text-lg font-bold mb-1 text-center">Pilih Tempat Duduk</h3>
+            
+            <!-- HEADER MODAL 4 DENGAN TOMBOL BACK -->
+            <div class="flex items-center gap-3 mb-2">
+                <button @click="modals.seat = false" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full transition flex items-center justify-center" title="Kembali ke Form">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <h3 class="text-lg font-bold flex-1">Pilih Tempat Duduk</h3>
+            </div>
+            
             <p class="text-sm text-center text-gray-500 mb-4 bg-gray-100 py-1 rounded-lg">Pilihan untuk Jam: <span x-text="formData.time" class="font-bold text-brand-green"></span> WIB</p>
             
             <!-- Pilihan Abjad -->
@@ -432,7 +508,9 @@
                 
                 // State Filter & Search
                 searchQuery: '',
-                sortOrder: 'newest',
+                // Parameter Sorting yang baru
+                sortColumn: 'createdAt',
+                sortDirection: 'desc',
 
                 // State Modals
                 modals: { list: false, form: false, time: false, seat: false },
@@ -483,6 +561,17 @@
                     return this.reservations.filter(r => r.date === dateStr);
                 },
 
+                // Method untuk mengatur sorting kolom yang aktif
+                sortBy(column) {
+                    if (this.sortColumn === column) {
+                        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        this.sortColumn = column;
+                        this.sortDirection = 'asc';
+                    }
+                },
+
+                // Filter & Sort
                 get filteredAndSortedReservations() {
                     let filtered = this.dayReservations;
                     
@@ -500,10 +589,31 @@
                     }
                     
                     filtered = filtered.sort((a, b) => {
-                        const timeA = a.createdAt || 0;
-                        const timeB = b.createdAt || 0;
-                        if (this.sortOrder === 'newest') return timeB - timeA;
-                        else return timeA - timeB; 
+                        let modifier = this.sortDirection === 'asc' ? 1 : -1;
+                        let valA, valB;
+
+                        switch(this.sortColumn) {
+                            case 'id':
+                                valA = a.id; valB = b.id; break;
+                            case 'createdAt':
+                                valA = a.createdAt; valB = b.createdAt; break;
+                            case 'name':
+                                valA = a.name.toLowerCase(); valB = b.name.toLowerCase(); break;
+                            case 'time':
+                                valA = a.time; valB = b.time; break;
+                            case 'seats':
+                                valA = (a.seats || [a.seat]).join(', '); valB = (b.seats || [b.seat]).join(', '); break;
+                            case 'paymentStatus':
+                                valA = (a.paymentStatus || 'DP') + (a.paymentMethod || 'Cash'); 
+                                valB = (b.paymentStatus || 'DP') + (b.paymentMethod || 'Cash'); 
+                                break;
+                            default:
+                                valA = a.createdAt; valB = b.createdAt;
+                        }
+
+                        if (valA < valB) return -1 * modifier;
+                        if (valA > valB) return 1 * modifier;
+                        return 0;
                     });
                     
                     return filtered;
@@ -512,8 +622,12 @@
                 openDay(day) {
                     this.selectedDate = day;
                     this.dayReservations = this.getReservations(day);
+                    
+                    // Reset Search & Sort State saat membuka hari baru
                     this.searchQuery = '';
-                    this.sortOrder = 'newest';
+                    this.sortColumn = 'createdAt';
+                    this.sortDirection = 'desc'; // Menampilkan Input Terbaru di atas secara default
+                    
                     this.modals.list = true;
                 },
 
@@ -547,7 +661,7 @@
                     );
                     
                     if (nameExists) {
-                        this.nameError = `Nama "${inputName}" sudah terdaftar pada tanggal ini! Harap gunakan nama lain (Contoh: ${inputName} 2).`;
+                        this.nameError = `Nama "${inputName}" sudah terdaftar pada tanggal ini! Harap gunakan nama lain.`;
                         return;
                     }
                     
@@ -622,7 +736,31 @@
                         let index = this.reservations.findIndex(r => r.id === this.formData.id);
                         this.reservations[index] = { ...this.formData, date: dateStr };
                     } else {
-                        let newId = 'RSV-' + Math.floor(10000 + Math.random() * 90000);
+                        // GENERATE ID BARU BERDASARKAN FORMAT: S2-YYMMDD-SEQ-RND
+                        let yy = dateStr.substring(2, 4);
+                        let mm = dateStr.substring(5, 7);
+                        let dd = dateStr.substring(8, 10);
+                        let datePart = `${yy}${mm}${dd}`;
+                        
+                        let todayRes = this.getReservations(this.selectedDate);
+                        let maxSeq = 0;
+                        todayRes.forEach(r => {
+                            let parts = r.id.split('-');
+                            if(parts.length === 4 && parts[1] === datePart) {
+                                let s = parseInt(parts[2]);
+                                if(s > maxSeq) maxSeq = s;
+                            }
+                        });
+                        let seqPart = String(maxSeq + 1).padStart(2, '0');
+                        
+                        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                        let randomPart = '';
+                        for(let i=0; i<3; i++) {
+                            randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+                        }
+                        
+                        let newId = `S2-${datePart}-${seqPart}-${randomPart}`;
+                        
                         this.reservations.push({ 
                             ...this.formData, 
                             id: newId, 
