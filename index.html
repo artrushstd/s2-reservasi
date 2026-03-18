@@ -628,47 +628,45 @@
                                 <th class="p-3">Detail Perubahan</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <!-- Loading state -->
-                            <template x-if="logLoading">
-                                <tr><td colspan="8" class="p-10 text-center text-gray-400">
+                        <tbody class="divide-y divide-gray-100" id="log-tbody">
+                            <!-- Loading row -->
+                            <tr x-show="logLoading">
+                                <td colspan="8" class="p-10 text-center text-gray-400">
                                     <svg class="animate-spin w-8 h-8 mx-auto mb-2 text-purple-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                                     <p class="text-sm font-medium">Memuat log...</p>
-                                </td></tr>
-                            </template>
-                            <!-- Empty state -->
-                            <template x-if="!logLoading && filteredLogs.length === 0">
-                                <tr><td colspan="8" class="p-12 text-center text-gray-400">
+                                </td>
+                            </tr>
+                            <!-- Empty row -->
+                            <tr x-show="!logLoading && filteredLogs.length === 0">
+                                <td colspan="8" class="p-12 text-center text-gray-400">
                                     <svg class="w-14 h-14 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                                     <p class="font-medium text-gray-500">Belum ada log aktivitas.</p>
-                                </td></tr>
-                            </template>
-                            <!-- Data rows -->
-                            <template x-if="!logLoading">
-                                <template x-for="(log, idx) in filteredLogs" :key="log.id">
-                                    <tr class="hover:bg-purple-50/30 transition">
-                                        <td class="p-3 text-center text-gray-400 font-bold text-xs" x-text="idx+1"></td>
-                                        <td class="p-3 text-xs text-gray-500 font-medium" x-text="formatDateTime(log.ts)"></td>
-                                        <td class="p-3">
-                                            <span class="px-2 py-1 rounded-lg text-xs font-black border"
-                                                :class="{
-                                                    'bg-green-100 text-green-800 border-green-200': log.action === 'INSERT',
-                                                    'bg-blue-100 text-blue-800 border-blue-200': log.action === 'UPDATE',
-                                                    'bg-red-100 text-red-700 border-red-200': log.action === 'DELETE'
-                                                }"
-                                                x-text="log.action === 'INSERT' ? '+ Tambah' : log.action === 'UPDATE' ? '✎ Edit' : '✕ Hapus'"></span>
-                                        </td>
-                                        <td class="p-3">
-                                            <span class="px-2 py-1 bg-purple-100 text-purple-800 border border-purple-200 rounded-lg text-xs font-bold" x-text="log.actor"></span>
-                                        </td>
-                                        <td class="p-3 font-mono text-xs font-bold text-gray-700" x-text="log.reservation_id || '-'"></td>
-                                        <td class="p-3 font-bold text-gray-800" x-text="log.customer_name || '-'"></td>
-                                        <td class="p-3 text-xs text-gray-600" x-text="log.reservation_date || '-'"></td>
-                                        <td class="p-3 text-xs text-gray-500 max-w-xs">
-                                            <div class="truncate" :title="log.detail" x-text="log.detail || '-'"></div>
-                                        </td>
-                                    </tr>
-                                </template>
+                                </td>
+                            </tr>
+                            <!-- Data rows - gunakan x-for langsung tanpa nested x-if -->
+                            <template x-for="(log, idx) in filteredLogs" :key="log.id">
+                                <tr x-show="!logLoading" class="hover:bg-purple-50/30 transition">
+                                    <td class="p-3 text-center text-gray-400 font-bold text-xs" x-text="idx+1"></td>
+                                    <td class="p-3 text-xs text-gray-500 font-medium" x-text="formatDateTime(log.ts)"></td>
+                                    <td class="p-3">
+                                        <span class="px-2 py-1 rounded-lg text-xs font-black border"
+                                            :class="{
+                                                'bg-green-100 text-green-800 border-green-200': log.action === 'INSERT',
+                                                'bg-blue-100 text-blue-800 border-blue-200': log.action === 'UPDATE',
+                                                'bg-red-100 text-red-700 border-red-200': log.action === 'DELETE'
+                                            }"
+                                            x-text="log.action === 'INSERT' ? '+ Tambah' : log.action === 'UPDATE' ? '✎ Edit' : '✕ Hapus'"></span>
+                                    </td>
+                                    <td class="p-3">
+                                        <span class="px-2 py-1 bg-purple-100 text-purple-800 border border-purple-200 rounded-lg text-xs font-bold" x-text="log.actor"></span>
+                                    </td>
+                                    <td class="p-3 font-mono text-xs font-bold text-gray-700" x-text="log.reservation_id || '-'"></td>
+                                    <td class="p-3 font-bold text-gray-800" x-text="log.customer_name || '-'"></td>
+                                    <td class="p-3 text-xs text-gray-600" x-text="log.reservation_date || '-'"></td>
+                                    <td class="p-3 text-xs text-gray-500 max-w-xs">
+                                        <div class="truncate" :title="log.detail" x-text="log.detail || '-'"></div>
+                                    </td>
+                                </tr>
                             </template>
                         </tbody>
                     </table>
@@ -1179,6 +1177,8 @@
                 },
 
                 async openLog() {
+                    this.logLoading = true;       // spinner aktif sebelum modal buka
+                    this.activityLogs = [];       // reset data lama
                     this.modals.log = true;
                     await this.loadLogs();
                 },
