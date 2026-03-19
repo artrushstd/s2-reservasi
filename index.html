@@ -20,9 +20,6 @@
     </script>
     <style>
         #print-area { display: none !important; }
-        @media print {
-            @page { size: A5 portrait; margin: 1cm; }
-        }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -39,28 +36,12 @@
             background: linear-gradient(135deg, #1a4f28 0%, #297c3f 50%, #1e6b36 100%);
             display: flex; align-items: center; justify-content: center;
         }
-        .login-card { animation: loginSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
         @keyframes loginSlideUp {
             from { opacity: 0; transform: translateY(32px) scale(0.97); }
             to   { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .fish-bg {
-            position: absolute; inset: 0; overflow: hidden; pointer-events: none;
-        }
-        .fish-bg span {
-            position: absolute; font-size: 80px; opacity: 0.04;
-            animation: floatFish 12s ease-in-out infinite;
-        }
-        .fish-bg span:nth-child(1) { top: 10%; left: 5%;  animation-delay: 0s; }
-        .fish-bg span:nth-child(2) { top: 60%; left: 80%; animation-delay: -4s; font-size: 120px; }
-        .fish-bg span:nth-child(3) { top: 80%; left: 20%; animation-delay: -8s; font-size: 60px; }
-        @keyframes floatFish {
-            0%,100% { transform: translateY(0) rotate(-5deg); }
-            50%      { transform: translateY(-20px) rotate(5deg); }
-        }
         .role-tab { transition: all 0.2s; }
         .role-tab.active { background: #297c3f; color: white; box-shadow: 0 2px 8px rgba(41,124,63,0.4); }
-        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake {
             10%,90% { transform: translateX(-2px); }
             20%,80% { transform: translateX(4px); }
@@ -89,7 +70,6 @@
                 </div>
                 <div class="px-8 py-8">
                     <p class="text-gray-500 text-sm text-center mb-6 font-medium">Pilih peran dan masukkan password</p>
-                    <!-- Tab Role -->
                     <div class="flex gap-2 p-1 rounded-xl mb-6" style="background:#f3f4f6;">
                         <button type="button" @click="loginForm.role = 'admin'" class="flex-1 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all"
                             :class="loginForm.role === 'admin' ? 'bg-brand-green text-white shadow-md' : 'text-gray-500 hover:text-gray-700'">
@@ -102,7 +82,6 @@
                             Owner
                         </button>
                     </div>
-                    <!-- Password input -->
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Password
                             <span class="ml-1 text-xs font-normal text-gray-400" x-text="'(' + loginForm.role + ')'"></span>
@@ -175,24 +154,20 @@
             </div>
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-3">
-                    <!-- Badge Role -->
                     <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold border"
                          :class="currentUser.role === 'owner' ? 'bg-amber-400/20 border-amber-400/30 text-amber-200' : 'bg-white/10 border-white/20 text-green-100'">
                         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
                         <span x-text="currentUser.name"></span>
                         <span class="opacity-70 uppercase text-[10px]" x-text="'(' + currentUser.role + ')'"></span>
                     </div>
-                    <!-- Tombol Log Aktivitas (admin only) -->
                     <button type="button" x-show="currentUser.role === 'owner'" @click="openLog()" class="p-2 hover:bg-green-700 rounded-lg transition text-sm flex items-center gap-2 bg-white/10 border border-white/20" title="Log Aktivitas">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
                         <span class="hidden sm:inline">Log Aktivitas</span>
                     </button>
-                    <!-- Refresh -->
                     <button type="button" @click="initApp()" class="p-2 hover:bg-green-700 rounded-lg transition text-sm flex items-center gap-2" title="Refresh Data">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                         <span class="hidden sm:inline">Refresh</span>
                     </button>
-                    <!-- Logout -->
                     <button type="button" @click="doLogout()" class="p-2 hover:bg-red-700 bg-red-500/20 border border-red-400/30 rounded-lg transition text-sm flex items-center gap-2" title="Keluar">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                         <span class="hidden sm:inline">Keluar</span>
@@ -258,9 +233,23 @@
             </div>
             <div class="p-6 overflow-y-auto flex-1 bg-white">
                 <div class="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-                    <button type="button" @click="openForm()" class="py-2.5 px-6 bg-brand-green text-white font-bold rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-md shadow-green-600/20">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Tambah Reservasi Baru
-                    </button>
+                    <!-- Tombol Kiri: Tambah + Print 1 Hari -->
+                    <div class="flex gap-3 flex-wrap">
+                        <button type="button" @click="openForm()" class="py-2.5 px-6 bg-brand-green text-white font-bold rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-md shadow-green-600/20">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Tambah Reservasi Baru
+                        </button>
+                        <!-- ══ TOMBOL PRINT 1 HARI ══ -->
+                        <button type="button" @click="printDay()"
+                                :disabled="dayReservations.length === 0"
+                                class="py-2.5 px-5 font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm"
+                                :class="dayReservations.length === 0
+                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                                    : 'bg-gray-800 text-white hover:bg-black border border-gray-700 shadow-gray-900/20'">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                            Print 1 Hari
+                            <span x-show="dayReservations.length > 0" class="bg-white/20 text-white text-xs font-black px-1.5 py-0.5 rounded-md" x-text="dayReservations.length + ' tiket'"></span>
+                        </button>
+                    </div>
                     <div class="flex gap-3 w-full sm:max-w-md">
                         <div class="relative flex-1">
                             <svg class="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -548,13 +537,10 @@
         </div>
     </div>
 
-
-    <!-- Modal Log Aktivitas (Admin Only) -->
+    <!-- Modal Log Aktivitas -->
     <div x-show="modals.log" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display:none;" x-transition.opacity>
         <div class="absolute inset-0" @click="modals.log = false"></div>
         <div class="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl relative z-10 mx-4" x-transition.scale.origin.center>
-
-            <!-- Header Modal Log -->
             <div class="p-5 border-b flex items-center gap-4 bg-gray-50 rounded-t-2xl">
                 <button type="button" @click="modals.log = false" class="p-2 bg-white border shadow-sm hover:bg-gray-100 text-gray-600 rounded-full transition flex items-center justify-center">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -566,7 +552,6 @@
                     </h3>
                     <p class="text-xs text-gray-500 mt-0.5">Riwayat semua perubahan yang dilakukan oleh Admin</p>
                 </div>
-                <!-- Filter & Search Log -->
                 <div class="flex gap-2 items-center">
                     <select x-model="logFilter.action" @change="updateLogComputed()" class="text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-purple-400 bg-white">
                         <option value="">Semua Aksi</option>
@@ -580,8 +565,6 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Statistik Ringkas -->
             <div class="px-6 pt-4 pb-2 grid grid-cols-3 gap-3">
                 <div class="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-3">
                     <div class="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center">
@@ -611,8 +594,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Tabel Log -->
             <div class="px-6 pb-6 overflow-y-auto flex-1">
                 <div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm bg-white">
                     <table class="w-full text-left text-sm whitespace-nowrap min-w-max">
@@ -628,22 +609,19 @@
                                 <th class="p-3">Detail Perubahan</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100" id="log-tbody">
-                            <!-- Loading row -->
+                        <tbody class="divide-y divide-gray-100">
                             <tr x-show="logLoading">
                                 <td colspan="8" class="p-10 text-center text-gray-400">
                                     <svg class="animate-spin w-8 h-8 mx-auto mb-2 text-purple-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                                     <p class="text-sm font-medium">Memuat log...</p>
                                 </td>
                             </tr>
-                            <!-- Empty row -->
                             <tr x-show="!logLoading && filteredLogs.length === 0">
                                 <td colspan="8" class="p-12 text-center text-gray-400">
                                     <svg class="w-14 h-14 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                                     <p class="font-medium text-gray-500">Belum ada log aktivitas.</p>
                                 </td>
                             </tr>
-                            <!-- Data rows - gunakan x-for langsung tanpa nested x-if -->
                             <template x-for="(log, idx) in filteredLogs" :key="log.id">
                                 <tr x-show="!logLoading" class="hover:bg-purple-50/30 transition">
                                     <td class="p-3 text-center text-gray-400 font-bold text-xs" x-text="idx+1"></td>
@@ -676,50 +654,8 @@
         </div>
     </div>
 
-    <!-- Print Area -->
-    <div id="print-area" class="bg-white text-black p-8 font-sans">
-        <div class="border-4 border-gray-800 p-6 rounded-2xl relative">
-            <div class="absolute top-6 right-6 font-extrabold text-3xl text-gray-200">S2</div>
-            <div class="text-center border-b-2 border-dashed border-gray-400 pb-4 mb-6">
-                <h1 class="text-2xl font-black uppercase tracking-widest text-gray-900">Pemancingan Suharno 2</h1>
-                <p class="text-sm font-semibold text-gray-600 mt-1">E-TIKET RESERVASI RESMI</p>
-            </div>
-            <div class="space-y-4">
-                <div class="flex justify-between border-b border-gray-200 pb-2">
-                    <span class="font-bold text-gray-500">No. Reservasi:</span>
-                    <span class="font-extrabold text-lg tracking-wider font-mono" x-text="printData.id"></span>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 pb-2">
-                    <span class="font-bold text-gray-500">Nama Pelanggan:</span>
-                    <span class="font-bold text-lg text-gray-900 uppercase" x-text="printData.name"></span>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 pb-2">
-                    <span class="font-bold text-gray-500">Tgl. Kedatangan:</span>
-                    <span class="font-bold text-lg" x-text="printData.date"></span>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 pb-2">
-                    <span class="font-bold text-gray-500">Jam Kedatangan:</span>
-                    <span class="font-bold text-lg px-2 border-2 border-black rounded" x-text="printData.time + ' WIB'"></span>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 pb-2">
-                    <span class="font-bold text-gray-500">Status Bayar:</span>
-                    <span class="font-bold text-lg uppercase" x-text="(printData.paymentStatus || 'DP') + ' via ' + (printData.paymentMethod || 'CASH')"></span>
-                </div>
-                <div class="flex justify-between border-b border-gray-200 pb-2">
-                    <span class="font-bold text-gray-500">Spot / Kursi:</span>
-                    <span class="font-extrabold text-2xl" x-text="printData.seats ? printData.seats.join(', ') : (printData.seat || '-')"></span>
-                </div>
-                <div class="pt-2">
-                    <span class="font-bold text-gray-500 block mb-2">Catatan Pesanan / Menu:</span>
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-300 text-sm whitespace-pre-wrap font-medium" x-text="printData.details || '- Tidak ada catatan -'"></div>
-                </div>
-            </div>
-            <div class="mt-8 text-center text-[10px] text-gray-500 leading-relaxed border-t-2 border-gray-800 pt-4 font-bold">
-                <p>SIMPAN DAN TUNJUKKAN TIKET INI KEPADA KASIR SAAT KEDATANGAN.</p>
-                <p>KURSI YANG DIPILIH BERLAKU MAKSIMAL 3 JAM DARI WAKTU KEDATANGAN TERTERA.</p>
-            </div>
-        </div>
-    </div>
+    <!-- Print Area (legacy, hidden) -->
+    <div id="print-area" style="display:none!important;"></div>
 
     <script>
         const SUPABASE_URL = 'https://vceqfpfdncilebiywult.supabase.co';
@@ -728,59 +664,45 @@
 
         document.addEventListener('alpine:init', () => {
             Alpine.data('reservationApp', () => ({
-                // ── AUTH STATE ──
                 isLoggedIn: false,
                 currentUser: { role: '', name: '' },
                 loginForm: { role: 'admin', password: '', showPass: false, error: '' },
-
-                // Kredensial (disimpan di sini, bukan di server karena app sederhana)
                 ACCOUNTS: {
                     admin: { password: 'admins2', name: 'Admin' },
                     owner: { password: 'owners2', name: 'Owner' },
                 },
-
                 isLoading: false,
                 toasts: [],
                 toastCount: 0,
-
                 monthNames: ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'],
                 timeSlots: Array.from({length: 14}, (_, i) => String(i + 7).padStart(2, '0') + ':00'),
                 seatLetters: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Q','R'],
                 selectedSeatLetter: 'A',
-
                 currentDate: new Date(),
                 currentMonth: new Date().getMonth(),
                 currentYear: new Date().getFullYear(),
                 selectedDate: null,
-
                 reservations: [],
                 dayReservations: [],
-
                 searchQuery: '',
                 sortColumn: 'createdAt',
                 sortDirection: 'desc',
-
                 modals: { list: false, form: false, time: false, seat: false, log: false },
                 formData: { id: null, name: '', time: '', seats: [], details: '', paymentStatus: 'DP', paymentMethod: 'Cash', createdAt: null },
                 nameError: '',
                 printData: {},
-
-                // ── LOG STATE ──
                 activityLogs: [],
                 logLoading: false,
                 logFilter: { action: '', search: '' },
+                logStats: { insert: 0, update: 0, delete: 0 },
+                filteredLogs: [],
 
-                // ─── HELPER: normalisasi seats agar selalu array ───
                 getSeats(res) {
                     if (!res) return [];
                     if (Array.isArray(res.seats) && res.seats.length > 0) return res.seats;
                     if (res.seat) return [res.seat];
                     return [];
                 },
-
-                // ─── DATA: log computed (diupdate manual karena Alpine tidak support getter) ───
-                logStats: { insert: 0, update: 0, delete: 0 },
-                filteredLogs: [],
 
                 showToast(message, type = 'success') {
                     const id = this.toastCount++;
@@ -792,25 +714,18 @@
                     }, 3000);
                 },
 
-                // ── LOGIN ──
                 doLogin() {
                     const role = this.loginForm.role;
                     const pwd  = this.loginForm.password;
                     const acc  = this.ACCOUNTS[role];
-
-                    if (!pwd.trim()) {
-                        this.loginForm.error = 'Password tidak boleh kosong!';
-                        return;
-                    }
+                    if (!pwd.trim()) { this.loginForm.error = 'Password tidak boleh kosong!'; return; }
                     if (pwd !== acc.password) {
                         this.loginForm.error = 'Password salah! Coba lagi.';
                         this.loginForm.password = '';
-                        // shake animation on card
                         const card = document.querySelector('.login-card');
                         if (card) { card.classList.add('shake'); setTimeout(() => card.classList.remove('shake'), 500); }
                         return;
                     }
-                    // Simpan sesi
                     const session = { role, name: acc.name, ts: Date.now() };
                     sessionStorage.setItem('s2_session', JSON.stringify(session));
                     this.currentUser = { role, name: acc.name };
@@ -838,11 +753,7 @@
                         const raw = sessionStorage.getItem('s2_session');
                         if (!raw) return false;
                         const session = JSON.parse(raw);
-                        // Sesi berlaku 8 jam
-                        if (Date.now() - session.ts > 8 * 60 * 60 * 1000) {
-                            sessionStorage.removeItem('s2_session');
-                            return false;
-                        }
+                        if (Date.now() - session.ts > 8 * 60 * 60 * 1000) { sessionStorage.removeItem('s2_session'); return false; }
                         this.currentUser = { role: session.role, name: session.name };
                         this.isLoggedIn = true;
                         return true;
@@ -850,31 +761,19 @@
                 },
 
                 async initApp() {
-                    // Cek sesi — jika belum login, jangan ambil data
-                    if (!this.isLoggedIn) {
-                        this.checkSession();
-                        if (!this.isLoggedIn) return;
-                    }
+                    if (!this.isLoggedIn) { this.checkSession(); if (!this.isLoggedIn) return; }
                     this.isLoading = true;
                     try {
                         const { data, error } = await supabaseClient.from('reservations').select('*');
                         if (error) throw error;
-
-                        // ─── FIX 1: Normalisasi semua field camelCase dari Supabase ───
-                        // Supabase kadang mengembalikan nama kolom lowercase jika tidak dikutip
                         this.reservations = (data || []).map(r => ({
                             ...r,
-                            // Pastikan field camelCase selalu ada
                             paymentStatus: r.paymentStatus || r.paymentstatus || 'DP',
                             paymentMethod: r.paymentMethod || r.paymentmethod || 'Cash',
                             createdAt: r.createdAt || r.createdat || null,
-                            // Pastikan seats selalu array
                             seats: Array.isArray(r.seats) ? r.seats : (r.seat ? [r.seat] : []),
                         }));
-
-                        if (this.selectedDate) {
-                            this.dayReservations = this.getReservations(this.selectedDate);
-                        }
+                        if (this.selectedDate) { this.dayReservations = this.getReservations(this.selectedDate); }
                     } catch (error) {
                         console.error("Gagal mengambil data:", error);
                         this.showToast("Gagal terhubung ke database!", "error");
@@ -884,10 +783,7 @@
                 },
 
                 get daysInMonth() { return new Date(this.currentYear, this.currentMonth + 1, 0).getDate(); },
-                get blankDays() {
-                    const blank = new Date(this.currentYear, this.currentMonth, 1).getDay();
-                    return Array.from({ length: blank });
-                },
+                get blankDays() { return Array.from({ length: new Date(this.currentYear, this.currentMonth, 1).getDay() }); },
                 get currentMonthName() { return this.monthNames[this.currentMonth]; },
                 get selectedDateString() {
                     if (!this.selectedDate) return '';
@@ -908,7 +804,6 @@
                 },
                 formatDate(dateStr) {
                     if (!dateStr) return '-';
-                    // handle YYYY-MM-DD string
                     const parts = String(dateStr).split('-');
                     if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
                     return dateStr;
@@ -924,12 +819,8 @@
                     return this.reservations.filter(r => r.date === dateStr);
                 },
                 sortBy(column) {
-                    if (this.sortColumn === column) {
-                        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        this.sortColumn = column;
-                        this.sortDirection = 'asc';
-                    }
+                    if (this.sortColumn === column) { this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'; }
+                    else { this.sortColumn = column; this.sortDirection = 'asc'; }
                 },
                 get filteredAndSortedReservations() {
                     let filtered = [...this.dayReservations];
@@ -977,7 +868,6 @@
                     this.nameError = '';
                     this.selectedSeatLetter = 'A';
                     if (res) {
-                        // ─── FIX 2: Deep copy + pastikan semua field ada ───
                         this.formData = {
                             id: res.id || null,
                             name: res.name || '',
@@ -995,12 +885,10 @@
                     this.modals.form = true;
                 },
 
-                // ─── FIX 3: Cek nama duplikat dengan try-catch dan guard ───
                 checkNameAndOpenTimePicker() {
                     try {
                         this.nameError = '';
                         const inputName = (this.formData.name || '').trim();
-
                         if (!inputName) {
                             this.nameError = 'Wajib diisi sebelum memilih jam!';
                             this.showToast('Silakan isi Nama Pemesan terlebih dahulu!', 'error');
@@ -1008,52 +896,37 @@
                             if (el) el.focus();
                             return;
                         }
-
-                        // ─── Cek duplikat dengan aman ───
                         const nameExists = (this.dayReservations || []).some(r => {
-                            if (!r || !r.name) return false; // guard jika data rusak
-                            return r.name.trim().toLowerCase() === inputName.toLowerCase() &&
-                                   r.id !== this.formData.id;
+                            if (!r || !r.name) return false;
+                            return r.name.trim().toLowerCase() === inputName.toLowerCase() && r.id !== this.formData.id;
                         });
-
                         if (nameExists) {
                             this.nameError = 'Nama sudah digunakan hari ini!';
                             this.showToast(`Nama "${inputName}" sudah terdaftar hari ini!`, 'error');
                             return;
                         }
-
                         this.modals.time = true;
                     } catch (err) {
                         console.error('Error checkNameAndOpenTimePicker:', err);
-                        // Tetap buka time picker meski ada error tak terduga
                         this.modals.time = true;
                     }
                 },
 
                 selectTime(time) {
-                    if (this.formData.time !== time) {
-                        this.formData.time = time;
-                        this.formData.seats = [];
-                    }
+                    if (this.formData.time !== time) { this.formData.time = time; this.formData.seats = []; }
                     this.modals.time = false;
                     setTimeout(() => { this.modals.seat = true; }, 150);
                 },
 
                 openSeatPicker() {
-                    if (!this.formData.time) {
-                        this.showToast('Silakan pilih Jam terlebih dahulu!', 'error');
-                        return;
-                    }
+                    if (!this.formData.time) { this.showToast('Silakan pilih Jam terlebih dahulu!', 'error'); return; }
                     this.modals.seat = true;
                 },
 
                 toggleSeat(seat) {
                     if (this.isSeatBooked(seat) && !this.formData.seats.includes(seat)) return;
-                    if (this.formData.seats.includes(seat)) {
-                        this.formData.seats = this.formData.seats.filter(s => s !== seat);
-                    } else {
-                        this.formData.seats = [...this.formData.seats, seat];
-                    }
+                    if (this.formData.seats.includes(seat)) { this.formData.seats = this.formData.seats.filter(s => s !== seat); }
+                    else { this.formData.seats = [...this.formData.seats, seat]; }
                 },
 
                 isSeatBooked(seat) {
@@ -1066,14 +939,10 @@
                             if (r.id === this.formData.id) return false;
                             const resHour = parseInt((r.time || '0').split(':')[0]);
                             const overlap = Math.max(selectedHour, resHour) < Math.min(selectedHour + 3, resHour + 3);
-                            if (overlap) {
-                                return this.getSeats(r).includes(seat);
-                            }
+                            if (overlap) { return this.getSeats(r).includes(seat); }
                             return false;
                         });
-                    } catch (err) {
-                        return false;
-                    }
+                    } catch (err) { return false; }
                 },
 
                 async saveReservation() {
@@ -1081,12 +950,9 @@
                         this.showToast("Gagal: Lengkapi Nama, Jam, dan pilih minimal 1 Kursi!", "error");
                         return;
                     }
-
                     this.isLoading = true;
                     try {
                         const dateStr = this.getFormattedDate(this.selectedDate);
-
-                        // ─── FIX 4: Payload bersih, hanya kirim kolom yang ada di tabel ───
                         const payload = {
                             name: this.formData.name.trim(),
                             date: dateStr,
@@ -1096,49 +962,36 @@
                             paymentStatus: this.formData.paymentStatus || 'DP',
                             paymentMethod: this.formData.paymentMethod || 'Cash',
                         };
-
                         if (this.formData.id) {
-                            // UPDATE
-                            const { error } = await supabaseClient
-                                .from('reservations')
-                                .update(payload)
-                                .eq('id', this.formData.id);
+                            const { error } = await supabaseClient.from('reservations').update(payload).eq('id', this.formData.id);
                             if (error) throw error;
                             this.showToast("Data berhasil diperbarui!");
                             await this.writeLog('UPDATE', this.formData.id, payload.name, dateStr,
                                 `Jam: ${payload.time}, Kursi: ${payload.seats.join(', ')}, Bayar: ${payload.paymentStatus} (${payload.paymentMethod})`);
                         } else {
-                            // INSERT — generate ID
                             const dateCode = dateStr.replace(/-/g, '').substring(2);
                             const todayRes = this.getReservations(this.selectedDate);
                             let maxSeq = 0;
                             todayRes.forEach(r => {
                                 if (r.id && r.id.startsWith(`S2-${dateCode}-`)) {
                                     const parts = r.id.split('-');
-                                    if (parts.length >= 3) {
-                                        const seq = parseInt(parts[2], 10);
-                                        if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
-                                    }
+                                    if (parts.length >= 3) { const seq = parseInt(parts[2], 10); if (!isNaN(seq) && seq > maxSeq) maxSeq = seq; }
                                 }
                             });
                             const nextSeq = String(maxSeq + 1).padStart(3, '0');
                             const randomStr = Math.random().toString(36).substring(2, 5).toUpperCase();
-                            const nowMs = new Date().getTime();
-
                             const insertPayload = {
                                 ...payload,
                                 id: `S2-${dateCode}-${nextSeq}-${randomStr}`,
-                                createdAt: nowMs,
+                                createdAt: new Date().getTime(),
                                 created_at: new Date().toISOString(),
                             };
-
                             const { error } = await supabaseClient.from('reservations').insert([insertPayload]);
                             if (error) throw error;
                             this.showToast("Reservasi berhasil ditambahkan!");
                             await this.writeLog('INSERT', insertPayload.id, payload.name, dateStr,
                                 `Jam: ${payload.time}, Kursi: ${payload.seats.join(', ')}, Bayar: ${payload.paymentStatus} (${payload.paymentMethod})`);
                         }
-
                         await this.initApp();
                         this.modals.form = false;
                     } catch (error) {
@@ -1169,7 +1022,6 @@
                     }
                 },
 
-                // ── LOG FUNCTIONS ──
                 async writeLog(action, resId, customerName, resDate, detail) {
                     try {
                         await supabaseClient.from('activity_logs').insert([{
@@ -1182,32 +1034,25 @@
                             ts: new Date().getTime(),
                             created_at: new Date().toISOString(),
                         }]);
-                    } catch(e) {
-                        console.warn('Log write failed (non-fatal):', e.message);
-                    }
+                    } catch(e) { console.warn('Log write failed (non-fatal):', e.message); }
                 },
 
                 async openLog() {
-                    this.logLoading = true;       // spinner aktif sebelum modal buka
-                    this.activityLogs = [];       // reset data lama
+                    this.logLoading = true;
+                    this.activityLogs = [];
                     this.modals.log = true;
                     await this.loadLogs();
                 },
 
-                // Update logStats dan filteredLogs berdasarkan activityLogs + filter aktif
                 updateLogComputed() {
                     const logs = this.activityLogs || [];
-                    // Hitung statistik dari SEMUA data (tidak terpengaruh filter)
                     this.logStats = {
                         insert: logs.filter(l => l.action === 'INSERT').length,
                         update: logs.filter(l => l.action === 'UPDATE').length,
                         delete: logs.filter(l => l.action === 'DELETE').length,
                     };
-                    // Terapkan filter
                     let filtered = [...logs];
-                    if (this.logFilter.action) {
-                        filtered = filtered.filter(l => l.action === this.logFilter.action);
-                    }
+                    if (this.logFilter.action) { filtered = filtered.filter(l => l.action === this.logFilter.action); }
                     if ((this.logFilter.search || '').trim()) {
                         const q = this.logFilter.search.toLowerCase();
                         filtered = filtered.filter(l =>
@@ -1223,23 +1068,11 @@
                 async loadLogs() {
                     this.logLoading = true;
                     try {
-                        const { data, error } = await supabaseClient
-                            .from('activity_logs')
-                            .select('*')
-                            .order('ts', { ascending: false })
-                            .limit(500);
-                        if (error) {
-                            console.error('loadLogs error:', error);
-                            this.showToast('Gagal memuat log: ' + (error.message || JSON.stringify(error)), 'error');
-                            this.activityLogs = [];
-                            this.updateLogComputed();
-                            return;
-                        }
-                        console.log('loadLogs sukses, jumlah data:', (data || []).length);
+                        const { data, error } = await supabaseClient.from('activity_logs').select('*').order('ts', { ascending: false }).limit(500);
+                        if (error) { this.showToast('Gagal memuat log: ' + (error.message || JSON.stringify(error)), 'error'); this.activityLogs = []; this.updateLogComputed(); return; }
                         this.activityLogs = data || [];
                         this.updateLogComputed();
                     } catch(e) {
-                        console.error('loadLogs exception:', e);
                         this.showToast('Gagal memuat log: ' + e.message, 'error');
                         this.activityLogs = [];
                         this.updateLogComputed();
@@ -1248,6 +1081,9 @@
                     }
                 },
 
+                // ══════════════════════════════════════════════════
+                //  PRINT TIKET INDIVIDUAL — Fix ukuran A6 portrait
+                // ══════════════════════════════════════════════════
                 printTicket(res) {
                     const seats = Array.isArray(res.seats) && res.seats.length > 0
                         ? res.seats.join(', ')
@@ -1259,26 +1095,86 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Tiket Reservasi - ${res.id}</title>
+<title>Tiket - ${res.id}</title>
 <style>
-  @page { size: A5 portrait; margin: 1cm; }
+  /* ── FIX: paksa A6 portrait (105mm x 148mm) ── */
+  @page {
+    size: 105mm 148mm;
+    margin: 6mm;
+  }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: 'Segoe UI', sans-serif; background: white; color: #1a1a1a; }
-  .wrapper { border: 4px solid #1a1a1a; border-radius: 16px; padding: 28px; position: relative; }
-  .watermark { position: absolute; top: 20px; right: 24px; font-size: 36px; font-weight: 900; color: #e5e7eb; letter-spacing: 2px; }
-  .header { text-align: center; border-bottom: 2px dashed #9ca3af; padding-bottom: 16px; margin-bottom: 20px; }
-  .header h1 { font-size: 20px; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; }
-  .header p { font-size: 12px; color: #6b7280; margin-top: 4px; font-weight: 600; }
-  .row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding: 10px 0; }
-  .row .label { font-weight: 700; color: #6b7280; font-size: 13px; }
-  .row .value { font-weight: 700; font-size: 14px; text-align: right; max-width: 60%; }
-  .row .value.big { font-size: 22px; font-weight: 900; }
-  .row .value.id { font-family: monospace; letter-spacing: 1px; font-size: 15px; }
-  .row .value.jam { border: 2px solid #1a1a1a; padding: 2px 10px; border-radius: 6px; }
+  html, body {
+    width: 105mm;
+    height: 148mm;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: white;
+    color: #1a1a1a;
+    font-size: 10pt;
+  }
+  .wrapper {
+    border: 3px solid #1a1a1a;
+    border-radius: 10px;
+    padding: 12px;
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .watermark {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-size: 28px;
+    font-weight: 900;
+    color: #e5e7eb;
+    letter-spacing: 2px;
+    pointer-events: none;
+  }
+  .header {
+    text-align: center;
+    border-bottom: 2px dashed #9ca3af;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+  .header h1 { font-size: 11pt; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+  .header p  { font-size: 7.5pt; color: #6b7280; margin-top: 2px; font-weight: 600; }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 4px 0;
+  }
+  .row .label { font-weight: 700; color: #6b7280; font-size: 7.5pt; white-space: nowrap; }
+  .row .value { font-weight: 700; font-size: 8.5pt; text-align: right; }
+  .row .value.big { font-size: 16pt; font-weight: 900; line-height: 1; }
+  .row .value.id  { font-family: monospace; letter-spacing: 0.5px; font-size: 7.5pt; }
+  .row .value.jam { border: 2px solid #1a1a1a; padding: 1px 6px; border-radius: 4px; }
   .row .value.upper { text-transform: uppercase; }
-  .notes-label { font-weight: 700; color: #6b7280; font-size: 13px; margin-top: 14px; margin-bottom: 6px; }
-  .notes-box { padding: 12px; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; font-size: 12px; font-weight: 500; white-space: pre-wrap; }
-  .footer { margin-top: 24px; text-align: center; font-size: 9px; color: #6b7280; line-height: 1.8; font-weight: 700; border-top: 2px solid #1a1a1a; padding-top: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .notes-label { font-weight: 700; color: #6b7280; font-size: 7pt; margin-top: 6px; margin-bottom: 3px; }
+  .notes-box {
+    padding: 6px 8px;
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    font-size: 7.5pt;
+    font-weight: 500;
+    white-space: pre-wrap;
+    flex: 1;
+    overflow: hidden;
+  }
+  .footer {
+    margin-top: 6px;
+    text-align: center;
+    font-size: 6.5pt;
+    color: #6b7280;
+    line-height: 1.6;
+    font-weight: 700;
+    border-top: 2px solid #1a1a1a;
+    padding-top: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
 </style>
 </head>
 <body>
@@ -1294,28 +1190,211 @@
   <div class="row"><span class="label">Jam Kedatangan:</span><span class="value jam">${res.time} WIB</span></div>
   <div class="row"><span class="label">Status Bayar:</span><span class="value upper">${payStatus}</span></div>
   <div class="row"><span class="label">Spot / Kursi:</span><span class="value big">${seats}</span></div>
-  <div class="notes-label">Catatan Pesanan / Menu:</div>
+  <div class="notes-label">Catatan / Menu:</div>
   <div class="notes-box">${details}</div>
   <div class="footer">
-    <p>Simpan dan tunjukkan tiket ini kepada kasir saat kedatangan.</p>
-    <p>Kursi berlaku maksimal 3 jam dari waktu kedatangan tertera.</p>
+    <p>Tunjukkan tiket ini kepada kasir saat kedatangan.</p>
+    <p>Kursi berlaku maks. 3 jam dari waktu tertera.</p>
   </div>
 </div>
-<script>window.onload = function(){ window.print(); window.onafterprint = function(){ window.close(); }; }<\/script>
+<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
 </body>
 </html>`;
 
-                    const popup = window.open('', '_blank', 'width=600,height=800,scrollbars=yes');
-                    if (popup) {
-                        popup.document.write(html);
-                        popup.document.close();
-                    } else {
-                        this.showToast('Izinkan popup di browser untuk mencetak tiket!', 'error');
+                    const popup = window.open('', '_blank', 'width=420,height=600,scrollbars=yes');
+                    if (popup) { popup.document.write(html); popup.document.close(); }
+                    else { this.showToast('Izinkan popup di browser untuk mencetak tiket!', 'error'); }
+                },
+
+                // ══════════════════════════════════════════════════
+                //  PRINT 1 HARI — A4 landscape, 4 tiket A6 per hal
+                // ══════════════════════════════════════════════════
+                printDay() {
+                    const list = [...this.dayReservations];
+                    if (list.length === 0) {
+                        this.showToast('Tidak ada reservasi di hari ini!', 'error');
+                        return;
                     }
+
+                    // Sort berdasarkan jam
+                    list.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+                    // Helper buat satu blok tiket A6
+                    const buildTicket = (res) => {
+                        const seats = Array.isArray(res.seats) && res.seats.length > 0
+                            ? res.seats.join(', ')
+                            : (res.seat || '-');
+                        const details = res.details || '- Tidak ada catatan -';
+                        const payStatus = (res.paymentStatus || 'DP') + ' via ' + (res.paymentMethod || 'CASH');
+                        return `
+<div class="ticket">
+  <div class="watermark">S2</div>
+  <div class="header">
+    <h1>Pemancingan Suharno 2</h1>
+    <p>E-TIKET RESERVASI RESMI</p>
+  </div>
+  <div class="row"><span class="label">No. Reservasi:</span><span class="value id">${res.id}</span></div>
+  <div class="row"><span class="label">Nama:</span><span class="value upper">${res.name}</span></div>
+  <div class="row"><span class="label">Tanggal:</span><span class="value">${res.date}</span></div>
+  <div class="row"><span class="label">Jam:</span><span class="value jam">${res.time} WIB</span></div>
+  <div class="row"><span class="label">Bayar:</span><span class="value upper">${payStatus}</span></div>
+  <div class="row"><span class="label">Kursi:</span><span class="value big">${seats}</span></div>
+  <div class="notes-label">Menu / Catatan:</div>
+  <div class="notes-box">${details}</div>
+  <div class="footer">
+    <p>Tunjukkan tiket ini kepada kasir saat kedatangan.</p>
+    <p>Kursi berlaku maks. 3 jam dari waktu tertera.</p>
+  </div>
+</div>`;
+                    };
+
+                    // Buat halaman: setiap halaman berisi 4 tiket (grid 2x2)
+                    let pages = '';
+                    for (let i = 0; i < list.length; i += 4) {
+                        const chunk = list.slice(i, i + 4);
+                        // Pad supaya selalu 4 kotak per halaman (kotak kosong jika kurang)
+                        while (chunk.length < 4) chunk.push(null);
+                        const cells = chunk.map(res =>
+                            res ? buildTicket(res) : '<div class="ticket ticket-empty"><div class="empty-label">— kosong —</div></div>'
+                        ).join('');
+                        const isLast = (i + 4 >= list.length);
+                        pages += `<div class="page${isLast ? '' : ' page-break'}">${cells}</div>`;
+                    }
+
+                    const dateLabel = this.selectedDateString;
+
+                    const html = `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Tiket Harian - ${dateLabel}</title>
+<style>
+  /* ── A4 portrait, grid 2x2, setiap sel = A6 (105mm x 148mm) ── */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    width: 210mm;
+    background: white;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #1a1a1a;
+  }
+
+  /* Satu halaman A4 = grid 2 kolom x 2 baris */
+  .page {
+    width: 210mm;
+    height: 297mm;
+    display: grid;
+    grid-template-columns: 105mm 105mm;
+    grid-template-rows: 148mm 148mm;
+    page-break-after: always;
+  }
+  .page-break { page-break-after: always; }
+
+  /* Setiap sel = A6 */
+  .ticket {
+    width: 105mm;
+    height: 148mm;
+    border: 1px dashed #9ca3af;   /* garis potong antar tiket */
+    padding: 7mm;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    font-size: 9pt;
+  }
+  /* Garis potong tepi luar: border solid buat kotak full */
+  .ticket:nth-child(1) { border-top: 3px solid #1a1a1a; border-left: 3px solid #1a1a1a; border-right: 1.5px dashed #ccc; border-bottom: 1.5px dashed #ccc; }
+  .ticket:nth-child(2) { border-top: 3px solid #1a1a1a; border-right: 3px solid #1a1a1a; border-left: 1.5px dashed #ccc; border-bottom: 1.5px dashed #ccc; }
+  .ticket:nth-child(3) { border-bottom: 3px solid #1a1a1a; border-left: 3px solid #1a1a1a; border-right: 1.5px dashed #ccc; border-top: 1.5px dashed #ccc; }
+  .ticket:nth-child(4) { border-bottom: 3px solid #1a1a1a; border-right: 3px solid #1a1a1a; border-left: 1.5px dashed #ccc; border-top: 1.5px dashed #ccc; }
+
+  .ticket-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9fafb;
+  }
+  .empty-label {
+    font-size: 11pt;
+    color: #d1d5db;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .watermark {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 24px;
+    font-weight: 900;
+    color: #e5e7eb;
+    pointer-events: none;
+  }
+  .header {
+    text-align: center;
+    border-bottom: 2px dashed #9ca3af;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+  }
+  .header h1 { font-size: 9.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; }
+  .header p  { font-size: 6.5pt; color: #6b7280; margin-top: 1px; font-weight: 600; }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 3px 0;
+  }
+  .row .label { font-weight: 700; color: #6b7280; font-size: 7pt; white-space: nowrap; }
+  .row .value { font-weight: 700; font-size: 8pt; text-align: right; max-width: 60%; }
+  .row .value.big { font-size: 15pt; font-weight: 900; line-height: 1; }
+  .row .value.id  { font-family: monospace; font-size: 7pt; }
+  .row .value.jam { border: 2px solid #1a1a1a; padding: 1px 5px; border-radius: 3px; }
+  .row .value.upper { text-transform: uppercase; }
+  .notes-label { font-weight: 700; color: #6b7280; font-size: 6.5pt; margin-top: 4px; margin-bottom: 2px; }
+  .notes-box {
+    padding: 4px 6px;
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 6.5pt;
+    font-weight: 500;
+    white-space: pre-wrap;
+    flex: 1;
+    overflow: hidden;
+  }
+  .footer {
+    margin-top: 4px;
+    text-align: center;
+    font-size: 5.5pt;
+    color: #6b7280;
+    line-height: 1.6;
+    font-weight: 700;
+    border-top: 2px solid #1a1a1a;
+    padding-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+</style>
+</head>
+<body>
+${pages}
+<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
+</body>
+</html>`;
+
+                    const popup = window.open('', '_blank', 'width=900,height=700,scrollbars=yes');
+                    if (popup) { popup.document.write(html); popup.document.close(); }
+                    else { this.showToast('Izinkan popup di browser untuk mencetak!', 'error'); }
                 }
+
             }));
         });
     </script>
-    </div><!-- end #main-content -->
+    </div><!-- end main content -->
 </body>
 </html>
