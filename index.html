@@ -29,8 +29,6 @@
         @keyframes floatFish { 0%,100%{ transform:translateY(0) rotate(-5deg); } 50%{ transform:translateY(-18px) rotate(5deg); } }
         .shake { animation: shake 0.45s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 10%,90%{transform:translateX(-2px);} 20%,80%{transform:translateX(4px);} 30%,50%,70%{transform:translateX(-6px);} 40%,60%{transform:translateX(6px);} }
-
-        /* Login page */
         #login-page {
             min-height: 100vh;
             background: linear-gradient(135deg, #1a4f28 0%, #297c3f 50%, #1e6b36 100%);
@@ -47,6 +45,24 @@
             20%,80% { transform: translateX(4px); }
             30%,50%,70% { transform: translateX(-6px); }
             40%,60% { transform: translateX(6px); }
+        }
+        /* ── Styling khusus input DP ── */
+        .dp-input-wrap {
+            position: relative;
+        }
+        .dp-input-wrap .prefix {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: 700;
+            color: #6b7280;
+            font-size: 14px;
+            pointer-events: none;
+            user-select: none;
+        }
+        .dp-input-wrap input {
+            padding-left: 36px;
         }
     </style>
 </head>
@@ -233,12 +249,10 @@
             </div>
             <div class="p-6 overflow-y-auto flex-1 bg-white">
                 <div class="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-                    <!-- Tombol Kiri: Tambah + Print 1 Hari -->
                     <div class="flex gap-3 flex-wrap">
                         <button type="button" @click="openForm()" class="py-2.5 px-6 bg-brand-green text-white font-bold rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-md shadow-green-600/20">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Tambah Reservasi Baru
                         </button>
-                        <!-- ══ TOMBOL PRINT 1 HARI ══ -->
                         <button type="button" @click="printDay()"
                                 :disabled="dayReservations.length === 0"
                                 class="py-2.5 px-5 font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm"
@@ -263,58 +277,26 @@
                             <tr>
                                 <th class="p-4 text-center w-12">No.</th>
                                 <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('id')">
-                                    <div class="flex items-center gap-1.5">
-                                        <span>No. Reservasi</span>
-                                        <span class="flex flex-col leading-none">
-                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'id' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>
-                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'id' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
-                                        </span>
-                                    </div>
+                                    <div class="flex items-center gap-1.5"><span>No. Reservasi</span><span class="flex flex-col leading-none"><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'id' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'id' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg></span></div>
                                 </th>
                                 <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('createdAt')">
-                                    <div class="flex items-center gap-1.5">
-                                        <span>Waktu Input</span>
-                                        <span class="flex flex-col leading-none">
-                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'createdAt' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>
-                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'createdAt' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
-                                        </span>
-                                    </div>
+                                    <div class="flex items-center gap-1.5"><span>Waktu Input</span><span class="flex flex-col leading-none"><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'createdAt' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'createdAt' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg></span></div>
                                 </th>
                                 <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('name')">
-                                    <div class="flex items-center gap-1.5">
-                                        <span>Nama Pemesan</span>
-                                        <span class="flex flex-col leading-none">
-                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'name' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>
-                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'name' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
-                                        </span>
-                                    </div>
+                                    <div class="flex items-center gap-1.5"><span>Nama Pemesan</span><span class="flex flex-col leading-none"><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'name' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'name' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg></span></div>
                                 </th>
                                 <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('time')">
-                                    <div class="flex items-center gap-1.5">
-                                        <span>Jam</span>
-                                        <span class="flex flex-col leading-none">
-                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'time' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>
-                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'time' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
-                                        </span>
-                                    </div>
+                                    <div class="flex items-center gap-1.5"><span>Jam</span><span class="flex flex-col leading-none"><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'time' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'time' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg></span></div>
                                 </th>
                                 <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('seats')">
-                                    <div class="flex items-center gap-1.5">
-                                        <span>Kursi</span>
-                                        <span class="flex flex-col leading-none">
-                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'seats' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>
-                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'seats' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
-                                        </span>
-                                    </div>
+                                    <div class="flex items-center gap-1.5"><span>Kursi</span><span class="flex flex-col leading-none"><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'seats' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'seats' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg></span></div>
                                 </th>
                                 <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('paymentStatus')">
-                                    <div class="flex items-center gap-1.5">
-                                        <span>Pembayaran</span>
-                                        <span class="flex flex-col leading-none">
-                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'paymentStatus' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg>
-                                            <svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'paymentStatus' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
-                                        </span>
-                                    </div>
+                                    <div class="flex items-center gap-1.5"><span>Pembayaran</span><span class="flex flex-col leading-none"><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'paymentStatus' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'paymentStatus' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg></span></div>
+                                </th>
+                                <!-- ++ Kolom DP Amount ++ -->
+                                <th class="p-4 cursor-pointer hover:bg-gray-200 transition select-none group" @click="sortBy('dpAmount')">
+                                    <div class="flex items-center gap-1.5"><span>Uang DP</span><span class="flex flex-col leading-none"><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'dpAmount' && sortDirection === 'asc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/></svg><svg class="w-2.5 h-2.5 transition-colors" :class="sortColumn === 'dpAmount' && sortDirection === 'desc' ? 'text-brand-green' : 'text-gray-300 group-hover:text-gray-400'" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg></span></div>
                                 </th>
                                 <th class="p-4 text-center">Aksi</th>
                             </tr>
@@ -322,7 +304,7 @@
                         <tbody class="divide-y divide-gray-100">
                             <template x-if="filteredAndSortedReservations.length === 0">
                                 <tr>
-                                    <td colspan="8" class="p-12 text-center">
+                                    <td colspan="9" class="p-12 text-center">
                                         <div class="flex flex-col items-center justify-center text-gray-400">
                                             <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                                             <p class="text-lg font-medium text-gray-500" x-text="dayReservations.length === 0 ? 'Belum ada data reservasi pada tanggal ini.' : 'Pencarian tidak ditemukan.'"></p>
@@ -355,6 +337,16 @@
                                                   x-text="res.paymentMethod || 'Cash'"></span>
                                         </div>
                                     </td>
+                                    <!-- ++ Cell DP Amount ++ -->
+                                    <td class="p-4">
+                                        <template x-if="res.dpAmount && res.dpAmount > 0">
+                                            <div class="font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded text-xs shadow-sm whitespace-nowrap"
+                                                 x-text="formatRupiah(res.dpAmount)"></div>
+                                        </template>
+                                        <template x-if="!res.dpAmount || res.dpAmount === 0">
+                                            <div class="text-gray-400 text-xs font-medium">—</div>
+                                        </template>
+                                    </td>
                                     <td class="p-4 text-center space-x-1">
                                         <button type="button" @click="printTicket(res)" class="p-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition shadow-sm" title="Print Tiket">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
@@ -362,7 +354,7 @@
                                         <button type="button" @click="openForm(res)" class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition shadow-sm" title="Edit">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                         </button>
-                                        <button type="button" @click="deleteRes(res.id)" class="p-2 bg-brand-red text-white rounded-lg hover:bg-red-700 transition shadow-sm" title="Hapus (Owner Only)">
+                                        <button type="button" @click="deleteRes(res.id)" class="p-2 bg-brand-red text-white rounded-lg hover:bg-red-700 transition shadow-sm" title="Hapus">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                         </button>
                                     </td>
@@ -386,12 +378,10 @@
                 <h3 class="text-xl font-extrabold flex-1 text-gray-800" x-text="formData.id ? 'Edit Data Reservasi' : 'Form Reservasi Baru'"></h3>
             </div>
             <div class="space-y-5">
+                <!-- Nama -->
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1.5">Nama Pemesan <span class="text-red-500">*</span></label>
-                    <input type="text"
-                           id="inputName"
-                           x-model="formData.name"
-                           @input="nameError = ''"
+                    <input type="text" id="inputName" x-model="formData.name" @input="nameError = ''"
                            class="w-full border p-3 rounded-xl outline-none transition bg-gray-50 focus:bg-white"
                            :class="nameError ? 'border-red-400 focus:ring-red-500 text-red-700' : 'border-gray-200 focus:ring-2 focus:ring-brand-green/30 focus:border-brand-green'"
                            placeholder="Masukkan nama lengkap">
@@ -402,6 +392,8 @@
                         </p>
                     </div>
                 </div>
+
+                <!-- Jam & Kursi -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1.5">Pilih Jam <span class="text-red-500">*</span></label>
@@ -421,6 +413,8 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Pembayaran -->
                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
                     <label class="block text-sm font-bold text-gray-800 mb-3">Status Pembayaran</label>
                     <div class="flex gap-3 mb-4">
@@ -443,7 +437,8 @@
                             <span class="font-bold text-sm text-gray-700">Lunas</span>
                         </label>
                     </div>
-                    <div>
+                    <!-- Metode -->
+                    <div class="mb-4">
                         <label class="block text-xs font-bold text-gray-500 mb-2">Pilih Metode Pembayaran</label>
                         <div class="flex gap-2">
                             <template x-for="method in ['Transfer', 'Qris', 'Cash']">
@@ -455,12 +450,40 @@
                             </template>
                         </div>
                     </div>
+
+                    <!-- ════════════ FIELD JUMLAH DP ════════════ -->
+                    <div x-show="formData.paymentStatus === 'DP'" x-transition.duration.200ms>
+                        <label class="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Jumlah Uang DP
+                        </label>
+                        <div class="dp-input-wrap">
+                            <span class="prefix">Rp</span>
+                            <input
+                                type="text"
+                                id="inputDpAmount"
+                                inputmode="numeric"
+                                x-model="formData.dpAmountDisplay"
+                                @input="onDpInput($event)"
+                                @focus="onDpFocus($event)"
+                                @blur="onDpBlur($event)"
+                                class="w-full border-2 p-3 rounded-xl outline-none transition bg-white font-bold text-gray-800 text-right"
+                                :class="'border-orange-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-400/20'"
+                                placeholder="0">
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1.5 font-medium">Masukkan nominal uang muka yang diterima</p>
+                    </div>
+                    <!-- ════════════════════════════════════════ -->
+
                 </div>
+
+                <!-- Catatan -->
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1.5">Catatan / Detail Pesanan Menu</label>
                     <textarea x-model="formData.details" rows="3" class="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-brand-green/30 focus:border-brand-green outline-none transition bg-gray-50 focus:bg-white" placeholder="Contoh: 2 Gurami Bakar, 1 Es Teh, Tambah Sambal..."></textarea>
                 </div>
             </div>
+
             <div class="mt-8 flex justify-end gap-3 border-t border-gray-100 pt-5">
                 <button type="button" @click="modals.form = false" class="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-100 font-bold transition">Batal</button>
                 <button type="button" @click="saveReservation()" class="px-6 py-2.5 bg-brand-green text-white rounded-xl hover:bg-green-700 font-bold shadow-lg shadow-green-600/30 transition flex items-center gap-2">
@@ -567,31 +590,16 @@
             </div>
             <div class="px-6 pt-4 pb-2 grid grid-cols-3 gap-3">
                 <div class="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-3">
-                    <div class="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    </div>
-                    <div>
-                        <div class="text-xl font-black text-green-700" x-text="logStats.insert"></div>
-                        <div class="text-xs text-green-600 font-semibold">Data Ditambah</div>
-                    </div>
+                    <div class="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center"><svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    <div><div class="text-xl font-black text-green-700" x-text="logStats.insert"></div><div class="text-xs text-green-600 font-semibold">Data Ditambah</div></div>
                 </div>
                 <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-3">
-                    <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </div>
-                    <div>
-                        <div class="text-xl font-black text-blue-700" x-text="logStats.update"></div>
-                        <div class="text-xs text-blue-600 font-semibold">Data Diubah</div>
-                    </div>
+                    <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center"><svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div>
+                    <div><div class="text-xl font-black text-blue-700" x-text="logStats.update"></div><div class="text-xs text-blue-600 font-semibold">Data Diubah</div></div>
                 </div>
                 <div class="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center gap-3">
-                    <div class="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </div>
-                    <div>
-                        <div class="text-xl font-black text-red-600" x-text="logStats.delete"></div>
-                        <div class="text-xs text-red-500 font-semibold">Data Dihapus</div>
-                    </div>
+                    <div class="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center"><svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></div>
+                    <div><div class="text-xl font-black text-red-600" x-text="logStats.delete"></div><div class="text-xs text-red-500 font-semibold">Data Dihapus</div></div>
                 </div>
             </div>
             <div class="px-6 pb-6 overflow-y-auto flex-1">
@@ -628,22 +636,14 @@
                                     <td class="p-3 text-xs text-gray-500 font-medium" x-text="formatDateTime(log.ts)"></td>
                                     <td class="p-3">
                                         <span class="px-2 py-1 rounded-lg text-xs font-black border"
-                                            :class="{
-                                                'bg-green-100 text-green-800 border-green-200': log.action === 'INSERT',
-                                                'bg-blue-100 text-blue-800 border-blue-200': log.action === 'UPDATE',
-                                                'bg-red-100 text-red-700 border-red-200': log.action === 'DELETE'
-                                            }"
+                                            :class="{'bg-green-100 text-green-800 border-green-200': log.action === 'INSERT','bg-blue-100 text-blue-800 border-blue-200': log.action === 'UPDATE','bg-red-100 text-red-700 border-red-200': log.action === 'DELETE'}"
                                             x-text="log.action === 'INSERT' ? '+ Tambah' : log.action === 'UPDATE' ? '✎ Edit' : '✕ Hapus'"></span>
                                     </td>
-                                    <td class="p-3">
-                                        <span class="px-2 py-1 bg-purple-100 text-purple-800 border border-purple-200 rounded-lg text-xs font-bold" x-text="log.actor"></span>
-                                    </td>
+                                    <td class="p-3"><span class="px-2 py-1 bg-purple-100 text-purple-800 border border-purple-200 rounded-lg text-xs font-bold" x-text="log.actor"></span></td>
                                     <td class="p-3 font-mono text-xs font-bold text-gray-700" x-text="log.reservation_id || '-'"></td>
                                     <td class="p-3 font-bold text-gray-800" x-text="log.customer_name || '-'"></td>
                                     <td class="p-3 text-xs text-gray-600" x-text="formatDate(log.reservation_date)"></td>
-                                    <td class="p-3 text-xs text-gray-500 max-w-xs">
-                                        <div class="truncate" :title="log.detail" x-text="log.detail || '-'"></div>
-                                    </td>
+                                    <td class="p-3 text-xs text-gray-500 max-w-xs"><div class="truncate" :title="log.detail" x-text="log.detail || '-'"></div></td>
                                 </tr>
                             </template>
                         </tbody>
@@ -654,7 +654,6 @@
         </div>
     </div>
 
-    <!-- Print Area (legacy, hidden) -->
     <div id="print-area" style="display:none!important;"></div>
 
     <script>
@@ -688,7 +687,8 @@
                 sortColumn: 'createdAt',
                 sortDirection: 'desc',
                 modals: { list: false, form: false, time: false, seat: false, log: false },
-                formData: { id: null, name: '', time: '', seats: [], details: '', paymentStatus: 'DP', paymentMethod: 'Cash', createdAt: null },
+                // ++ dpAmountDisplay = string terformat untuk tampilan, dpAmount = angka murni
+                formData: { id: null, name: '', time: '', seats: [], details: '', paymentStatus: 'DP', paymentMethod: 'Cash', createdAt: null, dpAmount: null, dpAmountDisplay: '' },
                 nameError: '',
                 printData: {},
                 activityLogs: [],
@@ -696,6 +696,62 @@
                 logFilter: { action: '', search: '' },
                 logStats: { insert: 0, update: 0, delete: 0 },
                 filteredLogs: [],
+
+                // ════════════════════════════════════════════
+                //  HELPER: Format & Parse Rupiah
+                // ════════════════════════════════════════════
+                formatRupiah(angka) {
+                    if (!angka && angka !== 0) return '';
+                    const num = parseInt(angka, 10);
+                    if (isNaN(num)) return '';
+                    return 'Rp ' + num.toLocaleString('id-ID');
+                },
+                parseRupiah(str) {
+                    // Hapus semua karakter non-digit
+                    const clean = String(str || '').replace(/\D/g, '');
+                    const num = parseInt(clean, 10);
+                    return isNaN(num) ? null : num;
+                },
+                formatDisplayOnly(str) {
+                    // Format string angka mentah → pemisah ribuan tanpa prefix
+                    const clean = String(str || '').replace(/\D/g, '');
+                    if (!clean) return '';
+                    return parseInt(clean, 10).toLocaleString('id-ID');
+                },
+
+                // ── Event handlers input DP ──
+                onDpInput(event) {
+                    const el = event.target;
+                    const raw = el.value.replace(/\D/g, '');           // strip non-digit
+                    const formatted = raw ? parseInt(raw, 10).toLocaleString('id-ID') : '';
+                    // Simpan posisi kursor sebelum update
+                    const caretPos = el.selectionStart;
+                    const oldLen = el.value.length;
+                    // Update model display
+                    this.formData.dpAmountDisplay = formatted;
+                    // Update nilai numerik
+                    this.formData.dpAmount = raw ? parseInt(raw, 10) : null;
+                    // Kembalikan kursor ke posisi yang tepat (adjust untuk tambah/hapus karakter)
+                    this.$nextTick(() => {
+                        const newLen = el.value.length;
+                        const diff = newLen - oldLen;
+                        const newCaret = Math.max(0, caretPos + diff);
+                        el.setSelectionRange(newCaret, newCaret);
+                    });
+                },
+                onDpFocus(event) {
+                    // Saat focus: semua teks terseleksi supaya mudah diganti
+                    event.target.select();
+                },
+                onDpBlur(event) {
+                    // Saat blur: pastikan format rapi, hapus jika 0
+                    if (this.formData.dpAmount === 0) {
+                        this.formData.dpAmount = null;
+                        this.formData.dpAmountDisplay = '';
+                    }
+                },
+
+                // ════════════════════════════════════════════
 
                 getSeats(res) {
                     if (!res) return [];
@@ -772,6 +828,8 @@
                             paymentMethod: r.paymentMethod || r.paymentmethod || 'Cash',
                             createdAt: r.createdAt || r.createdat || null,
                             seats: Array.isArray(r.seats) ? r.seats : (r.seat ? [r.seat] : []),
+                            // ++ Normalisasi dpAmount — kolom Supabase bisa lowercase
+                            dpAmount: r.dpAmount || r.dpamount || null,
                         }));
                         if (this.selectedDate) { this.dayReservations = this.getReservations(this.selectedDate); }
                     } catch (error) {
@@ -846,6 +904,7 @@
                             case 'time': valA = a.time || ''; valB = b.time || ''; break;
                             case 'seats': valA = this.getSeats(a).join(', '); valB = this.getSeats(b).join(', '); break;
                             case 'paymentStatus': valA = a.paymentStatus || 'DP'; valB = b.paymentStatus || 'DP'; break;
+                            case 'dpAmount': valA = a.dpAmount || 0; valB = b.dpAmount || 0; break;
                             default: valA = a.createdAt || 0; valB = b.createdAt || 0;
                         }
                         if (valA < valB) return -1 * modifier;
@@ -868,6 +927,7 @@
                     this.nameError = '';
                     this.selectedSeatLetter = 'A';
                     if (res) {
+                        const dpVal = res.dpAmount || res.dpamount || null;
                         this.formData = {
                             id: res.id || null,
                             name: res.name || '',
@@ -878,9 +938,12 @@
                             paymentMethod: res.paymentMethod || 'Cash',
                             createdAt: res.createdAt || null,
                             date: res.date || null,
+                            dpAmount: dpVal,
+                            // Format untuk tampilan input
+                            dpAmountDisplay: dpVal ? parseInt(dpVal, 10).toLocaleString('id-ID') : '',
                         };
                     } else {
-                        this.formData = { id: null, name: '', time: '', seats: [], details: '', paymentStatus: 'DP', paymentMethod: 'Cash', createdAt: null, date: null };
+                        this.formData = { id: null, name: '', time: '', seats: [], details: '', paymentStatus: 'DP', paymentMethod: 'Cash', createdAt: null, date: null, dpAmount: null, dpAmountDisplay: '' };
                     }
                     this.modals.form = true;
                 },
@@ -953,6 +1016,12 @@
                     this.isLoading = true;
                     try {
                         const dateStr = this.getFormattedDate(this.selectedDate);
+
+                        // ++ Sertakan dpAmount (angka murni) ke payload
+                        const dpAmountVal = (this.formData.paymentStatus === 'DP' && this.formData.dpAmount && this.formData.dpAmount > 0)
+                            ? this.formData.dpAmount
+                            : null;
+
                         const payload = {
                             name: this.formData.name.trim(),
                             date: dateStr,
@@ -961,13 +1030,16 @@
                             details: this.formData.details || null,
                             paymentStatus: this.formData.paymentStatus || 'DP',
                             paymentMethod: this.formData.paymentMethod || 'Cash',
+                            dpAmount: dpAmountVal,   // ← angka murni, NULL jika kosong/lunas
                         };
+
                         if (this.formData.id) {
                             const { error } = await supabaseClient.from('reservations').update(payload).eq('id', this.formData.id);
                             if (error) throw error;
                             this.showToast("Data berhasil diperbarui!");
+                            const dpLog = dpAmountVal ? `, DP: ${this.formatRupiah(dpAmountVal)}` : '';
                             await this.writeLog('UPDATE', this.formData.id, payload.name, dateStr,
-                                `Jam: ${payload.time}, Kursi: ${payload.seats.join(', ')}, Bayar: ${payload.paymentStatus} (${payload.paymentMethod})`);
+                                `Jam: ${payload.time}, Kursi: ${payload.seats.join(', ')}, Bayar: ${payload.paymentStatus} (${payload.paymentMethod})${dpLog}`);
                         } else {
                             const dateCode = dateStr.replace(/-/g, '').substring(2);
                             const todayRes = this.getReservations(this.selectedDate);
@@ -989,8 +1061,9 @@
                             const { error } = await supabaseClient.from('reservations').insert([insertPayload]);
                             if (error) throw error;
                             this.showToast("Reservasi berhasil ditambahkan!");
+                            const dpLog = dpAmountVal ? `, DP: ${this.formatRupiah(dpAmountVal)}` : '';
                             await this.writeLog('INSERT', insertPayload.id, payload.name, dateStr,
-                                `Jam: ${payload.time}, Kursi: ${payload.seats.join(', ')}, Bayar: ${payload.paymentStatus} (${payload.paymentMethod})`);
+                                `Jam: ${payload.time}, Kursi: ${payload.seats.join(', ')}, Bayar: ${payload.paymentStatus} (${payload.paymentMethod})${dpLog}`);
                         }
                         await this.initApp();
                         this.modals.form = false;
@@ -1081,15 +1154,14 @@
                     }
                 },
 
-                // ══════════════════════════════════════════════════
-                //  PRINT TIKET INDIVIDUAL — Fix ukuran A6 portrait
-                // ══════════════════════════════════════════════════
                 printTicket(res) {
-                    const seats = Array.isArray(res.seats) && res.seats.length > 0
-                        ? res.seats.join(', ')
-                        : (res.seat || '-');
+                    const seats = Array.isArray(res.seats) && res.seats.length > 0 ? res.seats.join(', ') : (res.seat || '-');
                     const details = res.details || '- Tidak ada catatan -';
                     const payStatus = (res.paymentStatus || 'DP') + ' via ' + (res.paymentMethod || 'CASH');
+                    const dpVal = res.dpAmount || res.dpamount || null;
+                    const dpLine = (res.paymentStatus === 'DP' && dpVal)
+                        ? `<div class="row"><span class="label">Uang DP:</span><span class="value" style="color:#d97706;font-weight:900;">${this.formatRupiah(dpVal)}</span></div>`
+                        : '';
 
                     const html = `<!DOCTYPE html>
 <html lang="id">
@@ -1097,84 +1169,24 @@
 <meta charset="UTF-8">
 <title>Tiket - ${res.id}</title>
 <style>
-  /* ── FIX: paksa A6 portrait (105mm x 148mm) ── */
-  @page {
-    size: 105mm 148mm;
-    margin: 6mm;
-  }
+  @page { size: 105mm 148mm; margin: 6mm; }
   * { margin:0; padding:0; box-sizing:border-box; }
-  html, body {
-    width: 105mm;
-    height: 148mm;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: white;
-    color: #1a1a1a;
-    font-size: 10pt;
-  }
-  .wrapper {
-    border: 3px solid #1a1a1a;
-    border-radius: 10px;
-    padding: 12px;
-    position: relative;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-  .watermark {
-    position: absolute;
-    top: 10px;
-    right: 14px;
-    font-size: 28px;
-    font-weight: 900;
-    color: #e5e7eb;
-    letter-spacing: 2px;
-    pointer-events: none;
-  }
-  .header {
-    text-align: center;
-    border-bottom: 2px dashed #9ca3af;
-    padding-bottom: 8px;
-    margin-bottom: 8px;
-  }
-  .header h1 { font-size: 11pt; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
-  .header p  { font-size: 7.5pt; color: #6b7280; margin-top: 2px; font-weight: 600; }
-  .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 4px 0;
-  }
-  .row .label { font-weight: 700; color: #6b7280; font-size: 7.5pt; white-space: nowrap; }
-  .row .value { font-weight: 700; font-size: 8.5pt; text-align: right; }
-  .row .value.big { font-size: 16pt; font-weight: 900; line-height: 1; }
-  .row .value.id  { font-family: monospace; letter-spacing: 0.5px; font-size: 7.5pt; }
-  .row .value.jam { border: 2px solid #1a1a1a; padding: 1px 6px; border-radius: 4px; }
-  .row .value.upper { text-transform: uppercase; }
-  .notes-label { font-weight: 700; color: #6b7280; font-size: 7pt; margin-top: 6px; margin-bottom: 3px; }
-  .notes-box {
-    padding: 6px 8px;
-    background: #f9fafb;
-    border: 1px solid #d1d5db;
-    border-radius: 5px;
-    font-size: 7.5pt;
-    font-weight: 500;
-    white-space: pre-wrap;
-    flex: 1;
-    overflow: hidden;
-  }
-  .footer {
-    margin-top: 6px;
-    text-align: center;
-    font-size: 6.5pt;
-    color: #6b7280;
-    line-height: 1.6;
-    font-weight: 700;
-    border-top: 2px solid #1a1a1a;
-    padding-top: 5px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
+  html, body { width:105mm; height:148mm; font-family:'Segoe UI',Arial,sans-serif; background:white; color:#1a1a1a; font-size:10pt; }
+  .wrapper { border:3px solid #1a1a1a; border-radius:10px; padding:12px; position:relative; height:100%; display:flex; flex-direction:column; }
+  .watermark { position:absolute; top:10px; right:14px; font-size:28px; font-weight:900; color:#e5e7eb; }
+  .header { text-align:center; border-bottom:2px dashed #9ca3af; padding-bottom:8px; margin-bottom:8px; }
+  .header h1 { font-size:11pt; font-weight:900; text-transform:uppercase; letter-spacing:2px; }
+  .header p  { font-size:7.5pt; color:#6b7280; margin-top:2px; font-weight:600; }
+  .row { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e5e7eb; padding:4px 0; }
+  .row .label { font-weight:700; color:#6b7280; font-size:7.5pt; white-space:nowrap; }
+  .row .value { font-weight:700; font-size:8.5pt; text-align:right; }
+  .row .value.big { font-size:16pt; font-weight:900; line-height:1; }
+  .row .value.id  { font-family:monospace; letter-spacing:0.5px; font-size:7.5pt; }
+  .row .value.jam { border:2px solid #1a1a1a; padding:1px 6px; border-radius:4px; }
+  .row .value.upper { text-transform:uppercase; }
+  .notes-label { font-weight:700; color:#6b7280; font-size:7pt; margin-top:6px; margin-bottom:3px; }
+  .notes-box { padding:6px 8px; background:#f9fafb; border:1px solid #d1d5db; border-radius:5px; font-size:7.5pt; font-weight:500; white-space:pre-wrap; flex:1; overflow:hidden; }
+  .footer { margin-top:6px; text-align:center; font-size:6.5pt; color:#6b7280; line-height:1.6; font-weight:700; border-top:2px solid #1a1a1a; padding-top:5px; text-transform:uppercase; letter-spacing:0.3px; }
 </style>
 </head>
 <body>
@@ -1189,6 +1201,7 @@
   <div class="row"><span class="label">Tgl. Kedatangan:</span><span class="value">${res.date}</span></div>
   <div class="row"><span class="label">Jam Kedatangan:</span><span class="value jam">${res.time} WIB</span></div>
   <div class="row"><span class="label">Status Bayar:</span><span class="value upper">${payStatus}</span></div>
+  ${dpLine}
   <div class="row"><span class="label">Spot / Kursi:</span><span class="value big">${seats}</span></div>
   <div class="notes-label">Catatan / Menu:</div>
   <div class="notes-box">${details}</div>
@@ -1200,185 +1213,83 @@
 <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
 </body>
 </html>`;
-
                     const popup = window.open('', '_blank', 'width=420,height=600,scrollbars=yes');
                     if (popup) { popup.document.write(html); popup.document.close(); }
                     else { this.showToast('Izinkan popup di browser untuk mencetak tiket!', 'error'); }
                 },
 
-                // ══════════════════════════════════════════════════
-                //  PRINT 1 HARI — A4 landscape, 4 tiket A6 per hal
-                // ══════════════════════════════════════════════════
                 printDay() {
                     const list = [...this.dayReservations];
-                    if (list.length === 0) {
-                        this.showToast('Tidak ada reservasi di hari ini!', 'error');
-                        return;
-                    }
-
-                    // Sort berdasarkan jam
+                    if (list.length === 0) { this.showToast('Tidak ada reservasi di hari ini!', 'error'); return; }
                     list.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
 
-                    // Helper buat satu blok tiket A6
+                    const self = this;
                     const buildTicket = (res) => {
-                        const seats = Array.isArray(res.seats) && res.seats.length > 0
-                            ? res.seats.join(', ')
-                            : (res.seat || '-');
+                        const seats = Array.isArray(res.seats) && res.seats.length > 0 ? res.seats.join(', ') : (res.seat || '-');
                         const details = res.details || '- Tidak ada catatan -';
                         const payStatus = (res.paymentStatus || 'DP') + ' via ' + (res.paymentMethod || 'CASH');
+                        const dpVal = res.dpAmount || res.dpamount || null;
+                        const dpLine = (res.paymentStatus === 'DP' && dpVal)
+                            ? `<div class="row"><span class="label">Uang DP:</span><span class="value" style="color:#d97706;">${self.formatRupiah(dpVal)}</span></div>`
+                            : '';
                         return `
 <div class="ticket">
   <div class="watermark">S2</div>
-  <div class="header">
-    <h1>Pemancingan Suharno 2</h1>
-    <p>E-TIKET RESERVASI RESMI</p>
-  </div>
+  <div class="header"><h1>Pemancingan Suharno 2</h1><p>E-TIKET RESERVASI RESMI</p></div>
   <div class="row"><span class="label">No. Reservasi:</span><span class="value id">${res.id}</span></div>
   <div class="row"><span class="label">Nama:</span><span class="value upper">${res.name}</span></div>
   <div class="row"><span class="label">Tanggal:</span><span class="value">${res.date}</span></div>
   <div class="row"><span class="label">Jam:</span><span class="value jam">${res.time} WIB</span></div>
   <div class="row"><span class="label">Bayar:</span><span class="value upper">${payStatus}</span></div>
+  ${dpLine}
   <div class="row"><span class="label">Kursi:</span><span class="value big">${seats}</span></div>
   <div class="notes-label">Menu / Catatan:</div>
   <div class="notes-box">${details}</div>
-  <div class="footer">
-    <p>Tunjukkan tiket ini kepada kasir saat kedatangan.</p>
-    <p>Kursi berlaku maks. 3 jam dari waktu tertera.</p>
-  </div>
+  <div class="footer"><p>Tunjukkan tiket ini kepada kasir saat kedatangan.</p><p>Kursi berlaku maks. 3 jam dari waktu tertera.</p></div>
 </div>`;
                     };
 
-                    // Buat halaman: setiap halaman berisi 4 tiket (grid 2x2)
                     let pages = '';
                     for (let i = 0; i < list.length; i += 4) {
                         const chunk = list.slice(i, i + 4);
-                        // Pad supaya selalu 4 kotak per halaman (kotak kosong jika kurang)
                         while (chunk.length < 4) chunk.push(null);
-                        const cells = chunk.map(res =>
-                            res ? buildTicket(res) : '<div class="ticket ticket-empty"><div class="empty-label">— kosong —</div></div>'
-                        ).join('');
+                        const cells = chunk.map(res => res ? buildTicket(res) : '<div class="ticket ticket-empty"><div class="empty-label">— kosong —</div></div>').join('');
                         const isLast = (i + 4 >= list.length);
                         pages += `<div class="page${isLast ? '' : ' page-break'}">${cells}</div>`;
                     }
-
-                    const dateLabel = this.selectedDateString;
 
                     const html = `<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Tiket Harian - ${dateLabel}</title>
+<title>Tiket Harian - ${this.selectedDateString}</title>
 <style>
-  /* ── A4 portrait, grid 2x2, setiap sel = A6 (105mm x 148mm) ── */
-  @page {
-    size: A4 portrait;
-    margin: 0;
-  }
+  @page { size: A4 portrait; margin: 0; }
   * { margin:0; padding:0; box-sizing:border-box; }
-  html, body {
-    width: 210mm;
-    background: white;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    color: #1a1a1a;
-  }
-
-  /* Satu halaman A4 = grid 2 kolom x 2 baris */
-  .page {
-    width: 210mm;
-    height: 297mm;
-    display: grid;
-    grid-template-columns: 105mm 105mm;
-    grid-template-rows: 148mm 148mm;
-    page-break-after: always;
-  }
-  .page-break { page-break-after: always; }
-
-  /* Setiap sel = A6 */
-  .ticket {
-    width: 105mm;
-    height: 148mm;
-    border: 1px dashed #9ca3af;   /* garis potong antar tiket */
-    padding: 7mm;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-    font-size: 9pt;
-  }
-  /* Garis potong tepi luar: border solid buat kotak full */
-  .ticket:nth-child(1) { border-top: 3px solid #1a1a1a; border-left: 3px solid #1a1a1a; border-right: 1.5px dashed #ccc; border-bottom: 1.5px dashed #ccc; }
-  .ticket:nth-child(2) { border-top: 3px solid #1a1a1a; border-right: 3px solid #1a1a1a; border-left: 1.5px dashed #ccc; border-bottom: 1.5px dashed #ccc; }
-  .ticket:nth-child(3) { border-bottom: 3px solid #1a1a1a; border-left: 3px solid #1a1a1a; border-right: 1.5px dashed #ccc; border-top: 1.5px dashed #ccc; }
-  .ticket:nth-child(4) { border-bottom: 3px solid #1a1a1a; border-right: 3px solid #1a1a1a; border-left: 1.5px dashed #ccc; border-top: 1.5px dashed #ccc; }
-
-  .ticket-empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f9fafb;
-  }
-  .empty-label {
-    font-size: 11pt;
-    color: #d1d5db;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .watermark {
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    font-size: 24px;
-    font-weight: 900;
-    color: #e5e7eb;
-    pointer-events: none;
-  }
-  .header {
-    text-align: center;
-    border-bottom: 2px dashed #9ca3af;
-    padding-bottom: 5px;
-    margin-bottom: 5px;
-  }
-  .header h1 { font-size: 9.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; }
-  .header p  { font-size: 6.5pt; color: #6b7280; margin-top: 1px; font-weight: 600; }
-  .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 3px 0;
-  }
-  .row .label { font-weight: 700; color: #6b7280; font-size: 7pt; white-space: nowrap; }
-  .row .value { font-weight: 700; font-size: 8pt; text-align: right; max-width: 60%; }
-  .row .value.big { font-size: 15pt; font-weight: 900; line-height: 1; }
-  .row .value.id  { font-family: monospace; font-size: 7pt; }
-  .row .value.jam { border: 2px solid #1a1a1a; padding: 1px 5px; border-radius: 3px; }
-  .row .value.upper { text-transform: uppercase; }
-  .notes-label { font-weight: 700; color: #6b7280; font-size: 6.5pt; margin-top: 4px; margin-bottom: 2px; }
-  .notes-box {
-    padding: 4px 6px;
-    background: #f9fafb;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    font-size: 6.5pt;
-    font-weight: 500;
-    white-space: pre-wrap;
-    flex: 1;
-    overflow: hidden;
-  }
-  .footer {
-    margin-top: 4px;
-    text-align: center;
-    font-size: 5.5pt;
-    color: #6b7280;
-    line-height: 1.6;
-    font-weight: 700;
-    border-top: 2px solid #1a1a1a;
-    padding-top: 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
+  html, body { width:210mm; background:white; font-family:'Segoe UI',Arial,sans-serif; color:#1a1a1a; }
+  .page { width:210mm; height:297mm; display:grid; grid-template-columns:105mm 105mm; grid-template-rows:148mm 148mm; page-break-after:always; }
+  .page-break { page-break-after:always; }
+  .ticket { width:105mm; height:148mm; border:1px dashed #9ca3af; padding:7mm; display:flex; flex-direction:column; position:relative; overflow:hidden; font-size:9pt; }
+  .ticket:nth-child(1) { border-top:3px solid #1a1a1a; border-left:3px solid #1a1a1a; border-right:1.5px dashed #ccc; border-bottom:1.5px dashed #ccc; }
+  .ticket:nth-child(2) { border-top:3px solid #1a1a1a; border-right:3px solid #1a1a1a; border-left:1.5px dashed #ccc; border-bottom:1.5px dashed #ccc; }
+  .ticket:nth-child(3) { border-bottom:3px solid #1a1a1a; border-left:3px solid #1a1a1a; border-right:1.5px dashed #ccc; border-top:1.5px dashed #ccc; }
+  .ticket:nth-child(4) { border-bottom:3px solid #1a1a1a; border-right:3px solid #1a1a1a; border-left:1.5px dashed #ccc; border-top:1.5px dashed #ccc; }
+  .ticket-empty { display:flex; align-items:center; justify-content:center; background:#f9fafb; }
+  .empty-label { font-size:11pt; color:#d1d5db; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+  .watermark { position:absolute; top:8px; right:12px; font-size:24px; font-weight:900; color:#e5e7eb; }
+  .header { text-align:center; border-bottom:2px dashed #9ca3af; padding-bottom:5px; margin-bottom:5px; }
+  .header h1 { font-size:9.5pt; font-weight:900; text-transform:uppercase; letter-spacing:1.5px; }
+  .header p  { font-size:6.5pt; color:#6b7280; margin-top:1px; font-weight:600; }
+  .row { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e5e7eb; padding:3px 0; }
+  .row .label { font-weight:700; color:#6b7280; font-size:7pt; white-space:nowrap; }
+  .row .value { font-weight:700; font-size:8pt; text-align:right; max-width:60%; }
+  .row .value.big { font-size:15pt; font-weight:900; line-height:1; }
+  .row .value.id  { font-family:monospace; font-size:7pt; }
+  .row .value.jam { border:2px solid #1a1a1a; padding:1px 5px; border-radius:3px; }
+  .row .value.upper { text-transform:uppercase; }
+  .notes-label { font-weight:700; color:#6b7280; font-size:6.5pt; margin-top:4px; margin-bottom:2px; }
+  .notes-box { padding:4px 6px; background:#f9fafb; border:1px solid #d1d5db; border-radius:4px; font-size:6.5pt; font-weight:500; white-space:pre-wrap; flex:1; overflow:hidden; }
+  .footer { margin-top:4px; text-align:center; font-size:5.5pt; color:#6b7280; line-height:1.6; font-weight:700; border-top:2px solid #1a1a1a; padding-top:3px; text-transform:uppercase; letter-spacing:0.3px; }
 </style>
 </head>
 <body>
@@ -1386,7 +1297,6 @@ ${pages}
 <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
 </body>
 </html>`;
-
                     const popup = window.open('', '_blank', 'width=900,height=700,scrollbars=yes');
                     if (popup) { popup.document.write(html); popup.document.close(); }
                     else { this.showToast('Izinkan popup di browser untuk mencetak!', 'error'); }
@@ -1395,6 +1305,6 @@ ${pages}
             }));
         });
     </script>
-    </div><!-- end main content -->
+    </div>
 </body>
 </html>
