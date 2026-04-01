@@ -946,7 +946,8 @@
                         const dpLine = (res.paymentStatus === 'DP' && res.dpAmount) ? `<div class="row"><span class="label">DP:</span><span class="value" style="color:#d97706;">${this.formatRupiah(res.dpAmount)}</span></div>` : '';
                         const phoneLine2 = res.phone ? `<div class="row"><span class="label">HP:</span><span class="value">${res.phone}</span></div>` : '';
                         const paxLine2 = res.pax ? `<div class="row"><span class="label">Pax:</span><span class="value">${res.pax}</span></div>` : '';
-                        const createdByLine2 = res.createdBy ? `<div class="row"><span class="label">Dibuat:</span><span class="value">${res.createdBy}</span></div>` : '';
+                        const createdByLine2 = res.createdBy ? `<div class="row"><span class="label">Dibuat oleh:</span><span class="value">${res.createdBy}</span></div>` : '';
+                        const inputDateLine2 = res.createdAt ? `<div class="row"><span class="label">Tgl. Input:</span><span class="value" style="color:#6b7280;font-size:6.5pt;">${this.formatDateTime(res.createdAt)}</span></div>` : '';
                         const detailsClass = (res.details && res.details.length > 150) ? 'notes-box multicolumn' : 'notes-box';
                         return `
 <div class="ticket"><div class="watermark">S2</div>
@@ -955,12 +956,13 @@
   <div class="row"><span class="label">Nama:</span><span class="value upper">${res.name}</span></div>
   ${phoneLine2}
   ${paxLine2}
-  <div class="row"><span class="label">Tgl:</span><span class="value">${this.formatDateLong(res.date)}</span></div>
+  <div class="row"><span class="label">Tgl. Kedatangan:</span><span class="value">${this.formatDateLong(res.date)}</span></div>
   <div class="row"><span class="label">Jam:</span><span class="value jam">${res.time} WIB</span></div>
   <div class="row"><span class="label">Bayar:</span><span class="value upper">${res.paymentStatus} / ${res.paymentMethod||'Cash'}</span></div>
   ${dpLine}
   <div class="row"><span class="label">Kursi:</span><span class="value upper">${seats}</span></div>
   ${catatanLine}
+  ${inputDateLine2}
   ${createdByLine2}
   <div class="notes-label">🍽 Menu:</div>
   <div class="${detailsClass}">${res.details || '- Tidak ada -'}</div>
