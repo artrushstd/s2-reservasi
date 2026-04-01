@@ -123,7 +123,6 @@
             <div class="grid grid-cols-7 gap-2 sm:gap-3">
                 <template x-for="blank in blankDays"><div class="h-24 bg-gray-50/50 rounded-xl border border-dashed border-gray-200"></div></template>
                 <template x-for="day in daysInMonth">
-                    <!-- Hari masa lalu tetap bisa diklik, tapi diberi style .past-date -->
                     <div @click="openDay(day)" class="h-24 border rounded-xl p-2 cursor-pointer transition relative flex flex-col items-center group" :class="[isToday(day) ? 'border-brand-green bg-green-50 shadow-sm' : 'border-gray-200 bg-white hover:border-brand-green hover:shadow-md', isPastDate(day) ? 'past-date' : '']">
                         <span class="text-sm font-semibold self-start" :class="isToday(day) ? 'text-brand-green font-extrabold bg-green-100 px-2 py-0.5 rounded-md' : 'text-gray-700'" x-text="day"></span>
                         <div class="mt-auto mb-1 w-full flex justify-center">
@@ -147,7 +146,6 @@
             <div class="p-6 overflow-y-auto flex-1 bg-white">
                 <div class="flex flex-col sm:flex-row justify-between gap-4 mb-6">
                     <div class="flex gap-3 flex-wrap">
-                        <!-- Sembunyikan tombol Reservasi Baru jika tanggal sudah lewat -->
                         <button x-show="!isPastDate(selectedDate)" type="button" @click="openForm()" class="py-2.5 px-6 bg-brand-green text-white font-bold rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-md">+ Reservasi Baru</button>
                         <button type="button" @click="printDay()" :disabled="dayReservations.length === 0" class="py-2.5 px-5 font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-sm" :class="dayReservations.length === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' : 'bg-gray-800 text-white hover:bg-black border border-gray-700'">🖨️ Print 1 Hari <span x-show="dayReservations.length > 0" class="bg-white/20 text-white text-xs font-black px-1.5 py-0.5 rounded-md" x-text="dayReservations.length + ' tiket'"></span></button>
                     </div>
@@ -209,7 +207,6 @@
                                     </td>
                                     <td class="p-4 text-center space-x-1">
                                         <button type="button" @click="printTicket(res)" class="p-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition shadow-sm" title="Print Tiket">🖨️</button>
-                                        <!-- Edit hanya muncul jika bukan tanggal masa lalu -->
                                         <button x-show="!isPastDate(selectedDate)" type="button" @click="openForm(res)" class="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition shadow-sm" title="Edit">✏️</button>
                                         <button type="button" @click="deleteRes(res.id)" class="p-2 bg-brand-red text-white rounded-lg hover:bg-red-700 transition shadow-sm" title="Hapus">🗑️</button>
                                     </td>
@@ -469,7 +466,6 @@
                 },
 
                 openDay(day) { 
-                    // Tetap izinkan klik walau hari lewat, untuk lihat data
                     this.selectedDate = day; 
                     this.dayReservations = this.getReservations(day); 
                     this.modals.list = true; 
@@ -557,7 +553,7 @@
                 async openLog() { this.logLoading = true; this.activityLogs =[]; this.modals.log = true; await this.loadLogs(); },
                 async loadLogs() { try { const { data } = await supabaseClient.from('activity_logs').select('*').order('ts', { ascending: false }).limit(200); this.activityLogs = data ||[]; } catch(e){} finally { this.logLoading = false; } },
 
-                // ════════════ CETAK 1 RESERVASI (A4 Portrait) ════════════
+                // ════════════ CETAK 1 RESERVASI (A4 Portrait - 2 Kolom Mengalir Kiri ke Kanan) ════════════
                 printTicket(res) {
                     const seats = this.getSeats(res).length > 0 ? this.getSeats(res).join(', ') : '—';
                     const details = res.details || '- Tidak ada pesanan menu -';
@@ -573,88 +569,86 @@
 <meta charset="UTF-8">
 <title>Tiket - ${res.id}</title>
 <style>
-  @page { size: A4 portrait; margin: 15mm; }
+  @page { size: A4 portrait; margin: 10mm; }
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body {
-      width: 180mm; /* A4 width 210mm - 30mm margin */
+      width: 190mm; /* A4 width (210) - 20mm margin */
+      height: 277mm; /* A4 height (297) - 20mm margin */
       font-family: 'Segoe UI', Arial, sans-serif;
       background: white;
       color: #1a1a1a;
-      font-size: 11pt;
   }
-  .print-wrapper {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-  }
-  .header { text-align: center; border-bottom: 2px dashed #9ca3af; padding-bottom: 15px; margin-bottom: 20px; position: relative; }
-  .watermark { position: absolute; top: -5px; right: 0; font-size: 40px; font-weight: 900; color: #e5e7eb; z-index: -1; letter-spacing: 2px; }
-  .header h1 { font-size: 18pt; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
-  .header p  { font-size: 10pt; color: #6b7280; margin-top: 5px; font-weight: 600; }
   
-  .content-section { margin-bottom: 20px; }
-  .row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding: 8px 0; }
-  .row .label { font-weight: 700; color: #6b7280; font-size: 11pt; white-space: nowrap; }
-  .row .value { font-weight: 700; font-size: 12pt; text-align: right; }
-  .row .value.id  { font-family: monospace; letter-spacing: 0.5px; font-size: 11pt; }
-  .row .value.jam { border: 2px solid #1a1a1a; padding: 3px 8px; border-radius: 4px; }
+  /* Layout Dibagi 2 Kolom Kiri dan Kanan yang Mengalir ke Bawah */
+  .print-wrapper {
+      column-count: 2;
+      column-gap: 15mm;
+      column-fill: auto;
+      height: 277mm; /* Memaksa agar konten mentok ke bawah baru pindah ke kanan */
+      position: relative;
+  }
+  
+  .header { text-align: center; border-bottom: 2px dashed #9ca3af; padding-bottom: 12px; margin-bottom: 15px; break-inside: avoid; position: relative; }
+  .watermark { position: absolute; top: -5px; right: 0; font-size: 30px; font-weight: 900; color: #e5e7eb; z-index: -1; letter-spacing: 2px; }
+  .header h1 { font-size: 14pt; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+  .header p  { font-size: 8.5pt; color: #6b7280; margin-top: 4px; font-weight: 600; }
+  
+  .row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding: 6px 0; break-inside: avoid; }
+  .row .label { font-weight: 700; color: #6b7280; font-size: 9.5pt; white-space: nowrap; }
+  .row .value { font-weight: 700; font-size: 10.5pt; text-align: right; }
+  .row .value.id  { font-family: monospace; letter-spacing: 0.5px; font-size: 10pt; }
+  .row .value.jam { border: 2px solid #1a1a1a; padding: 2px 6px; border-radius: 4px; }
   .row .value.upper { text-transform: uppercase; }
   
-  .notes-label { font-weight: 900; color: #1a1a1a; font-size: 12pt; margin-top: 15px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .notes-label { font-weight: 900; color: #1a1a1a; font-size: 11pt; margin-top: 15px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; break-after: avoid; }
+  
+  /* Tanpa Background Box agar tidak aneh saat terpotong 2 kolom */
   .notes-box {
-      padding: 12px 15px;
-      background: #f9fafb;
-      border: 1px solid #d1d5db;
-      border-radius: 5px;
-      font-size: 11pt;
+      font-size: 10.5pt;
       font-weight: 600;
       white-space: pre-wrap;
       line-height: 1.6;
-      min-height: 100px;
   }
   
   .footer {
-      margin-top: 30px;
+      margin-top: 20px;
       text-align: center;
-      font-size: 9pt;
+      font-size: 8pt;
       color: #6b7280;
       line-height: 1.6;
       font-weight: 700;
       border-top: 2px solid #1a1a1a;
-      padding-top: 12px;
+      padding-top: 8px;
       text-transform: uppercase;
+      break-inside: avoid;
   }
-  .print-meta { font-size: 9pt; color: #9ca3af; text-align: left; margin-top: 20px; }
+  .print-meta { font-size: 8pt; color: #9ca3af; text-align: left; margin-top: 15px; break-inside: avoid; line-height:1.4; }
 </style>
 </head>
 <body>
 <div class="print-wrapper">
+  <!-- Elemen Header dan Data akan mengisi kolom KIRI terlebih dahulu -->
   <div class="header">
     <div class="watermark">S2</div>
     <h1>Pemancingan Suharno 2</h1>
-    <p>E-TIKET RESERVASI RESMI</p>
+    <p>E-TIKET RESERVASI PELANGGAN</p>
   </div>
+  <div class="row"><span class="label">No. Reservasi:</span><span class="value id">${res.id}</span></div>
+  <div class="row"><span class="label">Nama Pelanggan:</span><span class="value upper">${res.name}</span></div>
+  ${phoneLine}
+  ${paxLine}
+  <div class="row"><span class="label">Tgl. Kedatangan:</span><span class="value">${this.formatDateLong(res.date)}</span></div>
+  <div class="row"><span class="label">Jam Kedatangan:</span><span class="value jam">${res.time} WIB</span></div>
+  <div class="row"><span class="label">Status Bayar:</span><span class="value upper">${payStatus}</span></div>
+  ${dpLine}
+  ${catatanLine}
+  <div class="row"><span class="label">Spot / Kursi:</span><span class="value upper">${seats}</span></div>
   
-  <div class="content-section">
-      <div class="row"><span class="label">No. Reservasi:</span><span class="value id">${res.id}</span></div>
-      <div class="row"><span class="label">Nama Pelanggan:</span><span class="value upper">${res.name}</span></div>
-      ${phoneLine}
-      ${paxLine}
-      <div class="row"><span class="label">Tgl. Kedatangan:</span><span class="value">${this.formatDateLong(res.date)}</span></div>
-      <div class="row"><span class="label">Jam Kedatangan:</span><span class="value jam">${res.time} WIB</span></div>
-      <div class="row"><span class="label">Status Bayar:</span><span class="value upper">${payStatus}</span></div>
-      ${dpLine}
-      ${catatanLine}
-      <div class="row"><span class="label">Spot / Kursi:</span><span class="value upper">${seats}</span></div>
-  </div>
-
-  <div class="content-section">
-      <div class="notes-label">🍽 Detail Menu:</div>
-      <div class="notes-box">${details}</div>
-  </div>
-
-  <div class="print-meta">Dicetak oleh: ${this.currentUser.name} | Input data: ${this.formatDateTime(res.createdAt)}</div>
+  <div class="notes-label">🍽 Detail Menu:</div>
+  <!-- Jika teks ini sangat panjang menabrak batas bawah halaman, akan otomatis lompat/memanjang ke kolom KANAN -->
+  <div class="notes-box">${details}</div>
   
+  <div class="print-meta">Dicetak oleh: ${this.currentUser.name} <br> Input data: ${this.formatDateTime(res.createdAt)}</div>
   <div class="footer">
     <p>Tunjukkan tiket ini kepada kasir saat kedatangan.</p>
     <p>Kursi berlaku maks. 3 jam dari waktu tertera.</p>
@@ -695,7 +689,9 @@
   <div class="notes-label">🍽 Menu:</div>
   <div class="${detailsClass}">${res.details || '- Tidak ada -'}</div>
   <div class="footer">
-     <div style="text-align:left;font-size:5pt;color:#9ca3af;margin-bottom:2px;">Cetak: ${this.currentUser.name}</div>
+     <div style="text-align:left;font-size:5.5pt;color:#9ca3af;margin-bottom:2px;font-weight:600;line-height:1.2;">
+        Cetak: ${this.currentUser.name}<br>Input: ${this.formatDateTime(res.createdAt)}
+     </div>
      <p>Kursi berlaku maks. 3 jam.</p>
   </div>
 </div>`;
@@ -730,7 +726,7 @@
   .notes-label { font-weight:900; color:#1a1a1a; font-size:8pt; margin-top:4px; margin-bottom:2px; text-transform:uppercase; }
   .notes-box { padding:4px 6px; background:#f9fafb; border:1px solid #d1d5db; border-radius:4px; font-size:8.5pt; font-weight:600; white-space:pre-wrap; flex:1; overflow:hidden; line-height:1.5; }
   .notes-box.multicolumn { column-count: 2; column-gap: 15px; column-rule: 1px dashed #d1d5db; word-break: break-word; }
-  .footer { margin-top:4px; text-align:center; font-size:5.5pt; color:#6b7280; border-top:2px solid #1a1a1a; padding-top:3px; text-transform:uppercase; }
+  .footer { margin-top:4px; text-align:center; font-size:5.5pt; color:#6b7280; border-top:2px solid #1a1a1a; padding-top:3px; text-transform:uppercase; display:flex; justify-content:space-between; align-items:flex-end; }
 </style></head><body>${pages}<script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script></body></html>`;
                     const popup = window.open('', '_blank', 'width=900,height=700');
                     if (popup) { popup.document.write(html); popup.document.close(); }
