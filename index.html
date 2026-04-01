@@ -739,8 +739,8 @@
 
                 // ════════════ CETAK 1 RESERVASI — A4 Landscape, 2 kolom vertikal ════════════
                 printTicket(res) {
-                    const seats    = this.getSeats(res).length > 0 ? this.getSeats(res).join(', ') : '—';
-                    const details  = res.details || '- Tidak ada pesanan menu -';
+                    const seats     = this.getSeats(res).length > 0 ? this.getSeats(res).join(', ') : '—';
+                    const details   = res.details || '- Tidak ada pesanan menu -';
                     const payStatus = (res.paymentStatus || 'DP') + ' via ' + (res.paymentMethod || 'CASH').toUpperCase();
 
                     const dpLine = (res.paymentStatus === 'DP' && res.dpAmount)
@@ -764,101 +764,111 @@
 <meta charset="UTF-8">
 <title>Tiket - ${res.id}</title>
 <style>
-  @page { size: A4 landscape; margin: 10mm; }
+  @page { size: A4 portrait; margin: 12mm 14mm; }
   * { margin:0; padding:0; box-sizing:border-box; }
-  html, body { width:277mm; height:190mm; font-family:'Segoe UI',Arial,sans-serif; background:white; color:#1a1a1a; }
+  html, body { width: 182mm; font-family:'Segoe UI',Arial,sans-serif; background:white; color:#1a1a1a; }
 
-  /* ── Layout utama: 1 tiket dibagi 2 kolom vertikal ── */
+  /* ── Layout: 1 tiket, dibagi ATAS dan BAWAH secara vertikal ── */
   .ticket {
-    display: grid;
-    grid-template-columns: 120mm 1fr;
-    height: 190mm;
-    width: 277mm;
+    display: flex;
+    flex-direction: column;
+    width: 182mm;
+    min-height: 273mm;
     border: 2px solid #1a1a1a;
     border-radius: 6px;
     overflow: hidden;
   }
 
-  /* ── KOLOM KIRI: Info reservasi ── */
-  .col-left {
-    display: flex;
-    flex-direction: column;
-    border-right: 2px dashed #9ca3af;
-    padding: 8mm 8mm 6mm 8mm;
+  /* ── BAGIAN ATAS: Info reservasi ── */
+  .section-top {
+    padding: 7mm 8mm 6mm 8mm;
     background: #fff;
+    border-bottom: 2.5px dashed #9ca3af;
   }
 
-  /* ── KOLOM KANAN: Detail menu ── */
-  .col-right {
+  /* ── BAGIAN BAWAH: Detail pesanan menu ── */
+  .section-bottom {
+    flex: 1;
+    padding: 6mm 8mm 7mm 8mm;
+    background: #f9fafb;
     display: flex;
     flex-direction: column;
-    padding: 8mm 8mm 6mm 8mm;
-    background: #f9fafb;
   }
 
   /* ── Header ── */
   .header {
     text-align: center;
     border-bottom: 2px dashed #9ca3af;
-    padding-bottom: 7px;
-    margin-bottom: 8px;
+    padding-bottom: 6px;
+    margin-bottom: 7px;
     position: relative;
   }
   .watermark {
     position: absolute; top: 0; right: 0;
-    font-size: 26px; font-weight: 900;
-    color: #e5e7eb; letter-spacing: 2px;
-    line-height: 1;
+    font-size: 28px; font-weight: 900;
+    color: #e5e7eb; letter-spacing: 2px; line-height: 1;
   }
-  .header h1 { font-size: 13pt; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #1a1a1a; }
-  .header p  { font-size: 7.5pt; color: #6b7280; margin-top: 2px; font-weight: 600; }
+  .header h1 { font-size: 14pt; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+  .header p  { font-size: 8pt; color: #6b7280; margin-top: 2px; font-weight: 600; }
 
-  /* ── Baris data ── */
+  /* ── Baris data (2 kolom: label kiri, value kanan) ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 8mm;
+  }
   .row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    gap: 8px;
+    gap: 6px;
     border-bottom: 1px solid #e5e7eb;
-    padding: 4.5px 0;
+    padding: 4px 0;
   }
   .row .label {
     font-weight: 700; color: #6b7280;
-    font-size: 8.5pt; white-space: nowrap; flex-shrink: 0;
+    font-size: 8pt; white-space: nowrap; flex-shrink: 0;
   }
   .row .value {
-    font-weight: 700; font-size: 9.5pt;
+    font-weight: 700; font-size: 9pt;
     text-align: right; color: #111827;
   }
-  .row .value.id   { font-family: monospace; font-size: 8.5pt; letter-spacing: 0.5px; }
-  .row .value.jam  { border: 2px solid #1a1a1a; padding: 1px 7px; border-radius: 4px; font-size: 10pt; }
-  .row .value.upper { text-transform: uppercase; }
-  .row .value.dp   { color: #d97706; }
+  .row .value.id     { font-family: monospace; font-size: 8pt; letter-spacing: 0.5px; }
+  .row .value.jam    { border: 2px solid #1a1a1a; padding: 1px 6px; border-radius: 4px; font-size: 10pt; }
+  .row .value.upper  { text-transform: uppercase; }
+  .row .value.dp     { color: #d97706; }
   .row .value.catatan { color: #c2410c; text-transform: uppercase; }
-  .row .value.meta { color: #6b7280; font-size: 8pt; }
+  .row .value.meta   { color: #6b7280; font-size: 7.5pt; }
 
-  /* ── Bagian menu (kanan) ── */
+  /* ── Bagian bawah: menu ── */
   .menu-header {
     font-weight: 900; font-size: 11pt; color: #1a1a1a;
     text-transform: uppercase; letter-spacing: 0.5px;
     border-bottom: 2px solid #1a1a1a;
-    padding-bottom: 6px; margin-bottom: 8px;
+    padding-bottom: 5px; margin-bottom: 7px;
   }
   .menu-box {
     flex: 1;
-    font-size: 11pt;
+    font-size: 11.5pt;
     font-weight: 600;
-    line-height: 1.7;
+    line-height: 1.75;
     white-space: pre-wrap;
     word-break: break-word;
     color: #111827;
-    overflow: hidden;
+  }
+  .menu-id-badge {
+    margin-top: 8px;
+    text-align: right;
+    font-family: monospace;
+    font-size: 7.5pt;
+    color: #9ca3af;
+    font-weight: 700;
   }
 
   /* ── Footer ── */
   .footer {
-    margin-top: auto;
-    padding-top: 6px;
+    margin-top: 6px;
+    padding-top: 5px;
     border-top: 1.5px solid #d1d5db;
     text-align: center;
     font-size: 7pt;
@@ -868,71 +878,57 @@
     letter-spacing: 0.3px;
     line-height: 1.6;
   }
-  .footer-right {
-    margin-top: auto;
-    padding-top: 6px;
-    border-top: 1.5px solid #d1d5db;
-    text-align: center;
-    font-size: 7pt;
-    color: #9ca3af;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-  .no-res-badge {
-    display: inline-block;
-    background: #f3f4f6; border: 1px solid #d1d5db;
-    border-radius: 4px; padding: 2px 6px;
-    font-family: monospace; font-size: 8pt;
-    font-weight: 900; color: #374151;
-    margin-top: 6px;
-  }
 </style>
 </head>
 <body>
 <div class="ticket">
 
-  <!-- KOLOM KIRI: Info Reservasi -->
-  <div class="col-left">
+  <!-- BAGIAN ATAS: Info Reservasi -->
+  <div class="section-top">
     <div class="header">
       <div class="watermark">S2</div>
       <h1>Pemancingan Suharno 2</h1>
       <p>E-TIKET RESERVASI RESMI</p>
     </div>
 
-    <div class="row"><span class="label">No. Reservasi</span><span class="value id">${res.id}</span></div>
-    <div class="row"><span class="label">Nama Pelanggan</span><span class="value upper">${res.name}</span></div>
-    ${phoneLine}
-    ${paxLine}
-    <div class="row"><span class="label">Tgl. Kedatangan</span><span class="value">${this.formatDateLong(res.date)}</span></div>
-    <div class="row"><span class="label">Jam Kedatangan</span><span class="value jam">${res.time} WIB</span></div>
-    <div class="row"><span class="label">Status Bayar</span><span class="value upper">${payStatus}</span></div>
-    ${dpLine}
-    ${catatanLine}
-    <div class="row"><span class="label">Spot / Kursi</span><span class="value upper">${seats}</span></div>
-    ${inputDateLine}
-    ${createdByLine}
-    ${updatedByLine}
+    <!-- Info utama: 2 kolom agar ringkas -->
+    <div class="info-grid">
+      <div>
+        <div class="row"><span class="label">No. Reservasi</span><span class="value id">${res.id}</span></div>
+        <div class="row"><span class="label">Nama Pelanggan</span><span class="value upper">${res.name}</span></div>
+        ${phoneLine}
+        ${paxLine}
+        <div class="row"><span class="label">Tgl. Kedatangan</span><span class="value">${this.formatDateLong(res.date)}</span></div>
+        <div class="row"><span class="label">Jam Kedatangan</span><span class="value jam">${res.time} WIB</span></div>
+      </div>
+      <div>
+        <div class="row"><span class="label">Status Bayar</span><span class="value upper">${payStatus}</span></div>
+        ${dpLine}
+        ${catatanLine}
+        <div class="row"><span class="label">Spot / Kursi</span><span class="value upper">${seats}</span></div>
+        ${inputDateLine}
+        ${createdByLine}
+        ${updatedByLine}
+      </div>
+    </div>
 
     <div class="footer">
-      <p>Tunjukkan tiket ini kepada kasir saat kedatangan.</p>
-      <p>Kursi berlaku maks. 3 jam dari waktu tertera.</p>
+      <p>Tunjukkan tiket ini kepada kasir saat kedatangan. &nbsp;|&nbsp; Kursi berlaku maks. 3 jam dari waktu tertera.</p>
     </div>
   </div>
 
-  <!-- KOLOM KANAN: Detail Pesanan Menu -->
-  <div class="col-right">
+  <!-- BAGIAN BAWAH: Detail Pesanan Menu -->
+  <div class="section-bottom">
     <div class="menu-header">🍽 Detail Pesanan Menu</div>
     <div class="menu-box">${details}</div>
-    <div class="footer-right">
-      <div class="no-res-badge">${res.id}</div>
-    </div>
+    <div class="menu-id-badge">Ref: ${res.id}</div>
   </div>
 
 </div>
 <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
 </body>
 </html>`;
-                    const popup = window.open('', '_blank', 'width=1100,height=750,scrollbars=yes');
+                    const popup = window.open('', '_blank', 'width=800,height=1000,scrollbars=yes');
                     if (popup) { popup.document.write(html); popup.document.close(); }
                     else { this.showToast('Izinkan popup!', 'error'); }
                 },
