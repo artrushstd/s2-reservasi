@@ -646,6 +646,7 @@
                     try {
                         const dateStr = this.getFormattedDate(this.selectedDate);
                         const dpAmountVal = (this.formData.paymentStatus === 'DP' && this.formData.dpAmount > 0) ? this.formData.dpAmount : null;
+                        // ══ FIX: gunakan nama kolom lowercase persis seperti di Supabase ══
                         const payload = {
                             name: this.formData.name.trim(),
                             date: dateStr,
@@ -653,14 +654,14 @@
                             seats: this.formData.seats,
                             details: this.formData.details || null,
                             notes: this.formData.notes || null,
-                            paymentStatus: this.formData.paymentStatus,
-                            paymentMethod: this.formData.paymentMethod,
-                            dpAmount: dpAmountVal,
+                            paymentstatus: this.formData.paymentStatus,
+                            paymentmethod: this.formData.paymentMethod,
+                            dpamount: dpAmountVal,
                             phone: this.formData.phone || null,
                             pax: String(paxVal)
                         };
                         if (this.formData.id) {
-                            payload.updatedBy = this.currentUser.name;
+                            payload.updatedby = this.currentUser.name;
                             await supabaseClient.from('reservations').update(payload).eq('id', this.formData.id);
                             await this.writeLog('UPDATE', this.formData.id, payload.name, dateStr, `Jam: ${payload.time}`);
                         } else {
@@ -673,9 +674,9 @@
                                 }
                             });
                             payload.id = `S2-${dateCode}-${String(maxSeq + 1).padStart(3, '0')}-${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
-                            payload.createdAt = new Date().getTime();
-                            payload.createdBy = this.currentUser.name;
-                            payload.updatedBy = null;
+                            payload.createdat = new Date().getTime();
+                            payload.createdby = this.currentUser.name;
+                            payload.updatedby = null;
                             await supabaseClient.from('reservations').insert([payload]);
                             await this.writeLog('INSERT', payload.id, payload.name, dateStr, `Jam: ${payload.time}`);
                         }
