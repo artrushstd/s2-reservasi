@@ -247,7 +247,8 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1.5">Pilih Jam <span class="text-red-500">*</span></label>
-                        <div @click="checkNameAndOpenTimePicker()" class="w-full border-2 p-3 rounded-xl text-center font-extrabold transition select-none" :class="(!formData.name || formData.name.trim() === '') ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed opacity-70' : 'border-brand-green bg-green-50 text-brand-green hover:bg-green-100 shadow-sm cursor-pointer'">
+                        <!-- TELAH DIPERBAIKI: Hapus validasi nama agar bisa langsung diklik -->
+                        <div @click="modals.time = true" class="w-full border-2 p-3 rounded-xl text-center font-extrabold transition select-none border-brand-green bg-green-50 text-brand-green hover:bg-green-100 shadow-sm cursor-pointer">
                             <span x-text="formData.time ? formData.time + ' WIB' : 'Pilih Jam'"></span>
                         </div>
                     </div>
@@ -274,7 +275,7 @@
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-gray-500 mb-2">Pilih Metode Pembayaran</label>
                         <div class="flex gap-2">
-                            <template x-for="method in['Transfer', 'Qris', 'EDC', 'Cash']">
+                            <template x-for="method in ['Transfer', 'Qris', 'EDC', 'Cash']">
                                 <label class="flex-1 flex items-center justify-center gap-1 cursor-pointer border-2 py-2 px-1 rounded-lg transition bg-white" :class="formData.paymentMethod === method ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm' : 'border-gray-200 text-gray-500 hover:border-gray-300'">
                                     <input type="radio" x-model="formData.paymentMethod" :value="method" class="hidden">
                                     <span class="font-bold text-xs uppercase tracking-wide" x-text="method"></span>
@@ -505,7 +506,9 @@
                     this.modals.form = true;
                 },
 
-                checkNameAndOpenTimePicker() { if (!this.formData.name.trim()) { this.nameError = 'Wajib diisi sebelum memilih jam!'; return; } this.modals.time = true; },
+                // Fungsi checkNameAndOpenTimePicker DIHAPUS karena validasi nama sebelum jam tidak lagi dibutuhkan
+                // Tombol "Pilih Jam" sekarang secara langsung membuka modal waktu.
+
                 selectTime(time) { if (this.formData.time !== time) { this.formData.time = time; this.formData.seats =[]; } this.modals.time = false; setTimeout(() => { this.modals.seat = true; }, 150); },
                 openSeatPicker() { if (!this.formData.time) return; this.modals.seat = true; },
                 toggleSeat(seat) { 
@@ -786,7 +789,8 @@
       Input : ${createdAtStr} oleh ${createdBy}${updatedStr}
     </div>
     <div class="right">
-      Dicetak : ${printDate} oleh ${this.currentUser.name}
+      Dicetak : ${printDate} <br>
+      oleh ${this.currentUser.name}
     </div>
   </div>
 </div>
@@ -809,8 +813,8 @@
                         const catatanLine = res.notes ? `<div class="row"><span class="label">Catatan:</span><span class="value upper" style="color:#c2410c;font-weight:700;">${res.notes}</span></div>` : '';
                         
                         // Detail Pembayaran & DP Harian
-                        const payStatus = (res.paymentStatus || 'DP') + ' via ' + (res.paymentMethod || 'CASH');
-                        const dpLine = (res.paymentStatus === 'DP' && res.dpAmount) ? `<div class="row"><span class="label">Jml DP (${res.paymentMethod || 'CASH'}):</span><span class="value" style="color:#d97706;font-weight:900;">${this.formatRupiah(res.dpAmount)}</span></div>` : '';
+                        const payStatus = res.paymentStatus === 'Lunas' ? `LUNAS (${res.paymentMethod || 'CASH'})` : 'DP (UANG MUKA)';
+                        const dpLine = (res.paymentStatus === 'DP' && res.dpAmount) ? `<div class="row"><span class="label">DP via ${res.paymentMethod || 'CASH'}:</span><span class="value" style="color:#d97706;font-weight:900;">${this.formatRupiah(res.dpAmount)}</span></div>` : '';
                         
                         const phoneLine = res.phone ? `<div class="row"><span class="label">No.HP:</span><span class="value">${res.phone}</span></div>` : '';
                         const paxLine = res.pax ? `<div class="row"><span class="label">Pax:</span><span class="value">${res.pax}</span></div>` : '';
@@ -841,7 +845,7 @@
      <p>Kursi berlaku maks. 3 jam.</p>
      <div class="meta-print">
         <div class="left">Input : ${createdAtStr} oleh ${createdBy}${updatedStr}</div>
-        <div class="right">Dicetak : ${printDate} oleh ${this.currentUser.name}</div>
+        <div class="right">Dicetak : ${printDate}<br>oleh ${this.currentUser.name}</div>
      </div>
   </div>
 </div>`;
